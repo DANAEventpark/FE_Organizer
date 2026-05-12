@@ -1,1 +1,31 @@
+/* ===================================================
+   DANAEventpark - FE_Organizer
+   TailwindCSS v4 Setup
+   =================================================== */
 @import "tailwindcss";
+
+/* Custom Theme Tokens */
+@theme {
+  /* Brand Colors */
+  --color-primary: #7c3aed;       /* Violet-600 */
+  --color-primary-light: #a78bfa; /* Violet-400 */
+  --color-secondary: #f59e0b;     /* Amber-500 */
+  --color-accent: #10b981;        /* Emerald-500 */
+
+  /* Neutral */
+  --color-bg: #0f172a;            /* Slate-900 */
+  --color-surface: #1e293b;       /* Slate-800 */
+  --color-border: #334155;        /* Slate-700 */
+  --color-text: #f1f5f9;          /* Slate-100 */
+  --color-text-muted: #94a3b8;    /* Slate-400 */
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
