@@ -158,9 +158,10 @@ const LoginPage = () => {
           {/* Footer Link */}
           <p className="text-center text-sm text-gray-500 mt-8">
             Chưa có tài khoản?{' '}
-            <Link to="/register" className="text-green-600 font-medium hover:underline">
+            <Link to="/register" className="text-blue-500 font-medium hover:underline">
               Đăng ký ngay
             </Link>
+
           </p>
         </div>
       </div>
