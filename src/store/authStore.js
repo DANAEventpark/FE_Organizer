@@ -1,0 +1,19 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+export const useAuthStore = create(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      login: (user, token) => set({ user, token }),
+      logout: () => set({ user: null, token: null }),
+    }),
+    {
+      name: 'auth-storage', // name of item in the storage (must be unique)
+    }
+  )
+);
+
+export const useIsLoggedIn = () => useAuthStore((state) => !!state.token);
+export const useIsOrganizer = () => useAuthStore((state) => state.user?.role === 'organizer');
