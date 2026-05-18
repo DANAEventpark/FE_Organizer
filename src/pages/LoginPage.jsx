@@ -23,7 +23,8 @@ const LoginPage = () => {
       const response = await loginApi({ email, password });
       const { user, token } = response.data.data;
       
-      if (user.role !== 'organizer') {
+      const roleName = typeof user.role === 'object' ? user.role?.name : user.role;
+      if (roleName !== 'organizer') {
         setError('Tài khoản không có quyền truy cập nhà tổ chức.');
         setLoading(false);
         return;
