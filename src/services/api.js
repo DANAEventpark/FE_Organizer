@@ -1,5 +1,5 @@
 import axios from 'axios'
-import useAuthStore from '@/stores/useAuthStore'
+import useAuthStore from '@/store/authStore'
 
 /**
  * Axios Instance — FE_Organizer
