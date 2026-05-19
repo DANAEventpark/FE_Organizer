@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import RoleSelectionModal from '../components/common/RoleSelectionModal';
 
 /**
  * HomePage — FE_Organizer
@@ -6,6 +8,14 @@ import { Link } from 'react-router-dom';
  * Sẽ được phát triển đầy đủ trong các REQ tiếp theo
  */
 const HomePage = () => {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authActionType, setAuthActionType] = useState('login');
+
+  const openAuthModal = (type) => {
+    setAuthActionType(type);
+    setIsAuthModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
       <div className="text-center">
@@ -19,23 +29,29 @@ const HomePage = () => {
           <span className="px-4 py-2 bg-violet-600 text-white rounded-full text-sm">
             FE_Organizer — dev
           </span>
-          
+
           <div className="flex gap-4 mt-4">
-            <Link 
-              to="/login" 
+            <button
+              onClick={() => openAuthModal('login')}
               className="px-6 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
             >
               Đăng nhập
-            </Link>
-            <Link 
-              to="/register" 
-              className="px-6 py-3 border border-red-500 text-red-500 rounded-lg font-medium hover:bg-red-50 transition-colors"
+            </button>
+            <button
+              onClick={() => openAuthModal('register')}
+              className="px-6 py-3 border border-red-500 text-red-500 rounded-lg font-medium hover:bg-red-50 hover:text-red-600 transition-colors"
             >
               Đăng ký
-            </Link>
+            </button>
           </div>
         </div>
       </div>
+
+      <RoleSelectionModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        actionType={authActionType}
+      />
     </div>
   )
 }
