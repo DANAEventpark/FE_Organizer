@@ -1,11 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import ProtectedRoute from '@/components/ProtectedRoute'
-
-// Dummy component
-const OrgDashboard = () => <div className="p-8 text-2xl font-bold">Organizer Dashboard</div>;
+import DashboardPage from '@/pages/DashboardPage'
 
 /**
  * Router Configuration — FE_Organizer
@@ -15,7 +12,7 @@ const OrgDashboard = () => <div className="p-8 text-2xl font-bold">Organizer Das
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     path: '/login',
@@ -30,13 +27,13 @@ const router = createBrowserRouter([
     path: '/dashboard',
     element: (
       <ProtectedRoute role="organizer">
-        <OrgDashboard />
+        <DashboardPage />
       </ProtectedRoute>
     )
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />
+    element: <Navigate to="/dashboard" replace />
   }
 ])
 

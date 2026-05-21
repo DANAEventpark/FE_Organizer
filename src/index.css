@@ -7,10 +7,10 @@
 /* Custom Theme Tokens */
 @theme {
   /* Brand Colors */
-  --color-primary: #7c3aed;       /* Violet-600 */
-  --color-primary-light: #a78bfa; /* Violet-400 */
-  --color-secondary: #f59e0b;     /* Amber-500 */
-  --color-accent: #10b981;        /* Emerald-500 */
+  --color-primary: #0f766e;       /* Teal-700 */
+  --color-primary-light: #14b8a6; /* Teal-500 */
+  --color-secondary: #f97316;     /* Orange-500 */
+  --color-accent: #84cc16;        /* Lime-500 */
 
   /* Neutral */
   --color-bg: #0f172a;            /* Slate-900 */
