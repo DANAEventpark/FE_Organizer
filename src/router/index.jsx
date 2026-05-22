@@ -3,6 +3,7 @@ import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import DashboardPage from '@/pages/DashboardPage'
+import ProfilePage from '@/pages/ProfilePage'
 
 /**
  * Router Configuration — FE_Organizer
@@ -28,6 +29,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute role="organizer">
         <DashboardPage />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/dashboard/profile',
+    element: (
+      <ProtectedRoute role="organizer">
+        <ProfilePage />
       </ProtectedRoute>
     )
   },

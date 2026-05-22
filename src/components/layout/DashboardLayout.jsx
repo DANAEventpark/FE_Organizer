@@ -59,15 +59,15 @@ const DashboardLayout = ({ children }) => {
             <p className="text-xs text-gray-500 font-semibold mb-4 px-2 uppercase tracking-wider">Tài khoản</p>
             <nav className="space-y-2">
               <Link
-                to="/settings"
+                to="/dashboard/profile"
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  pathname === '/settings'
+                  pathname === '/dashboard/profile'
                     ? 'bg-white/20 text-[#e96a52] font-medium border-l-4 border-[#e96a52]'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <Settings size={20} />
-                Cài đặt
+                Hồ sơ cá nhân
               </Link>
               <button
                 onClick={handleLogout}
@@ -81,15 +81,15 @@ const DashboardLayout = ({ children }) => {
         </div>
 
         {/* User Profile Footer */}
-        <div className="p-4 border-t border-white/10 m-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#e96a52] text-white flex items-center justify-center font-bold text-lg">
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'O'}
+        <Link to="/dashboard/profile" className="p-4 border-t border-white/10 m-4 flex items-center gap-3 hover:bg-white/5 rounded-xl transition-colors cursor-pointer">
+          <div className="w-10 h-10 rounded-full bg-[#e96a52] text-white flex items-center justify-center font-bold text-lg overflow-hidden">
+            {user?.avatar ? <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" /> : (user?.name ? user.name.charAt(0).toUpperCase() : 'O')}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-white truncate">{user?.name || 'Organizer'}</p>
             <p className="text-xs text-gray-400">Organizer</p>
           </div>
-        </div>
+        </Link>
       </aside>
 
       {/* Main Content */}
