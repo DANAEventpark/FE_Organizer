@@ -4,6 +4,7 @@ import RegisterPage from '@/pages/RegisterPage'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import DashboardPage from '@/pages/DashboardPage'
 import ProductDetail from '@/pages/ProductDetail'
+import MyEventsPage from '@/pages/MyEventsPage'
 
 
 /**
@@ -36,6 +37,14 @@ const router = createBrowserRouter([
   {
     path: '*',
     element: <Navigate to="/dashboard" replace />
+  },
+  {
+    path: '/events',
+    element: (
+      <ProtectedRoute role="organizer">
+        <MyEventsPage />
+      </ProtectedRoute>
+    )
   },
   {
   path: '/events/:id',

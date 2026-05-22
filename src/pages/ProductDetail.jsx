@@ -46,7 +46,7 @@ const ProductDetail = () => {
     if (id) fetchEventDetail();
   }, [id]);
 
-  // ─── TRANH TRẠNG LOADING RESPONSIVE ───────────────────────────────────────
+  // ─── TRANH TRẠNG LOADING RESPONSIVE 
   if (loading) {
     return (
       <DashboardLayout>
@@ -58,12 +58,12 @@ const ProductDetail = () => {
     );
   }
 
-  // ─── TRẠNG THÁI LỖI KHÔNG TÌM THẤY DỮ LIỆU (SAU KHI ĐÃ FIX) ──────────────────
+  // ─── TRẠNG THÁI LỖI KHÔNG TÌM THẤY DỮ LIỆU 
   if (!eventData) {
     return (
       <DashboardLayout>
         <div className="p-6 sm:p-8 text-center max-w-md mx-auto mt-12 sm:mt-20 bg-white rounded-2xl shadow-sm border border-gray-100 mx-4 sm:mx-auto">
-          <div className="text-4xl mb-3">⚠️</div>
+          <div className="text-4xl mb-3"></div>
           <p className="text-gray-600 font-semibold mb-2 text-base">Không tìm thấy dữ liệu sự kiện!</p>
           <p className="text-gray-400 text-xs mb-5 leading-relaxed">
             Vui lòng kiểm tra lại đường dẫn hoặc sự kiện này có thể đã bị xóa khỏi hệ thống.
@@ -117,7 +117,7 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Nhóm Nút bấm Co giãn theo màn hình (Full-width trên Mobile, Auto trên Desktop) */}
+          {/* Nhóm Nút bấm Co giãn theo màn hình  */}
           <div className="flex items-center gap-2 w-full lg:w-auto pt-2 lg:pt-0 border-t border-gray-50 lg:border-none">
             <button className="flex-1 lg:flex-none bg-[#e96a52] hover:bg-[#d75c46] text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors whitespace-nowrap">
               <Edit size={16} /> Chỉnh sửa
@@ -128,10 +128,10 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Bố cục Grid Layout: 1 Cột trên Mobile/Tablet, 3 Cột trên Desktop lớn */}
+   
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
           
-          {/* CỘT TRÁI (RỘNG 2/3 TRÊN DESKTOP): MÔ TẢ & BẢNG KHÁCH HÀNG */}
+  
           <div className="lg:col-span-2 space-y-6 lg:space-y-8 order-2 lg:order-1">
             
             {/* Khối mô tả sự kiện */}
@@ -144,7 +144,7 @@ const ProductDetail = () => {
               </p>
             </div>
 
-            {/* Khối danh sách người tham gia (Đã responsive Table sẵn bên trong component con) */}
+            {/* Khối danh sách người tham gia  */}
             <AttendeeList 
               confirmedUsers={eventData.confirmed_users || []}
               waitlistUsers={eventData.waitlist_users || []}
@@ -153,7 +153,7 @@ const ProductDetail = () => {
             />
           </div>
 
-          {/* CỘT PHẢI (RỘNG 1/3 TRÊN DESKTOP): THÔNG TIN PHỤ & OVERVIEW */}
+        
           <div className="space-y-6 order-1 lg:order-2">
             
             {/* Gọi Component Thông tin chi tiết địa điểm, thời gian */}

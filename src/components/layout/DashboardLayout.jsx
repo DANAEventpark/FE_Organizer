@@ -17,7 +17,7 @@ const DashboardLayout = ({ children }) => {
 
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Sự kiện của tôi', icon: Calendar, path: '/productdetail' },
+    { name: 'Sự kiện của tôi', icon: Calendar, path: '/events' },
   ];
 
   return (

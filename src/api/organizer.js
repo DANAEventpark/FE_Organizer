@@ -14,6 +14,12 @@ export const organizerApi = {
     return response.data;
   },
 
+  // Lấy tất cả sự kiện của Organizer
+  getAllEvents: async () => {
+    const response = await client.get('/organizer/events');
+    return response.data;
+  },
+
   // Lấy dữ liệu chi tiết sự kiện 
   getEventDetail: async (id) => {
     const response = await client.get(`/organizer/events/${id}`);
