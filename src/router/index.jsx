@@ -3,6 +3,8 @@ import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import DashboardPage from '@/pages/DashboardPage'
+import ProductDetail from '@/pages/ProductDetail'
+
 
 /**
  * Router Configuration — FE_Organizer
@@ -34,7 +36,15 @@ const router = createBrowserRouter([
   {
     path: '*',
     element: <Navigate to="/dashboard" replace />
-  }
+  },
+  {
+  path: '/events/:id',
+  element: (
+    <ProtectedRoute role="organizer">
+      <ProductDetail />
+    </ProtectedRoute>
+  )
+},
 ])
 
 export default router

@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, PlusSquare, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, Settings, LogOut, Menu, X } from 'lucide-react';
 import logoImg from '../../assets/logo.jpg';
 import { useAuthStore } from '../../store/authStore';
 
 const DashboardLayout = ({ children }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -15,14 +17,33 @@ const DashboardLayout = ({ children }) => {
 
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Sự kiện của tôi', icon: Calendar, path: '/events' },
-    { name: 'Tạo sự kiện', icon: PlusSquare, path: '/events/create' },
+    { name: 'Sự kiện của tôi', icon: Calendar, path: '/productdetail' },
   ];
 
   return (
-    <div className="flex h-screen bg-[#FDFBF7] font-sans">
+    <div className="flex h-screen bg-[#FDFBF7] font-sans overflow-hidden">
+      
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#173846] text-white flex items-center justify-between px-4 z-50 shadow-md">
+        <div className="flex items-center gap-2">
+          <img src={logoImg} alt="DANAEventSpark" className="w-8 h-8 rounded object-cover" />
+          <span className="text-lg font-bold tracking-wide">DANAEventSpark</span>
+        </div>
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 focus:outline-none">
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-[#173846] text-white flex flex-col justify-between">
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#173846] text-white flex flex-col justify-between transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div>
           {/* Logo */}
           <div className="p-6 flex items-center gap-3">
@@ -40,6 +61,7 @@ const DashboardLayout = ({ children }) => {
                   <Link
                     key={item.name}
                     to={item.path}
+                    onClick={() => setIsSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive
                         ? 'bg-white/20 text-[#e96a52] font-medium border-l-4 border-[#e96a52]'
@@ -93,7 +115,7 @@ const DashboardLayout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pt-16 md:pt-0 w-full">
         {children}
       </main>
     </div>
