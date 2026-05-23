@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, LayoutGrid, Users, Star, Edit, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom'; // Thêm useNavigate
+import { Plus, LayoutGrid, Users, Star, Edit, Trash2 } from 'lucide-react'; // Thêm Eye
 import { useAuthStore } from '../store/authStore';
 import { organizerApi } from '../api/organizer';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -57,6 +57,7 @@ const StatusBadge = ({ status }) => {
 
 const DashboardPage = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ total_events: 0, total_registrations: 0, average_rating: 0 });
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -154,25 +155,58 @@ const DashboardPage = () => {
               <tbody className="divide-y divide-gray-100">
                 {events.length > 0 ? (
                   events.map((event) => (
-                    <tr key={event.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr 
+                      key={event.id} 
+                      onClick={() => navigate(`/events/${event.id}`)} 
+                      className="hover:bg-gray-50/80 transition-colors cursor-pointer" 
+                    >
+                      {/* Tên sự kiện */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 hover:text-[#e96a52] transition-colors">
                         {event.title}
                       </td>
+
+                      {/* Ngày diễn ra */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(event.start_time).toLocaleDateString('vi-VN')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap w-64">
+
+                      {/* Tiến độ đăng ký */}
+                      <td className="px-6 py-4 whitespace-nowrap w-64" onClick={(e) => e.stopPropagation()}>
+                        {/* Bọc hoặc thêm e.stopPropagation() nếu thanh progress bar có tương tác, tránh nhảy trang ngoài ý muốn */}
                         <ProgressBar current={event.registrations_count || 0} max={event.capacity || 0} />
                       </td>
+
+                      {/* Trạng thái */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <StatusBadge status={event.status} />
                       </td>
+
+                      {/* Hành động (Sửa/Xóa) */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         <div className="flex gap-3">
-                          <button className="hover:text-blue-500 transition-colors" title="Chỉnh sửa">
+                          {/* Nút chỉnh sửa */}
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation(); // Chặn không cho kích hoạt onClick của thẻ <tr>
+                              console.log("Edit event", event.id);
+                              // navigate(`/events/${event.id}/edit`); (Mở ra nếu có trang edit)
+                            }} 
+                            className="hover:text-blue-500 transition-colors" 
+                            title="Chỉnh sửa"
+                          >
                             <Edit size={18} />
                           </button>
-                          <button className="hover:text-red-500 transition-colors" title="Xóa">
+
+                          {/* Nút xóa */}
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation(); // Chặn không cho kích hoạt onClick của thẻ <tr>
+                              console.log("Delete event", event.id);
+                              // Gọi hàm xóa của bạn ở đây
+                            }} 
+                            className="hover:text-red-500 transition-colors" 
+                            title="Xóa"
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -181,7 +215,7 @@ const DashboardPage = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500 italic">
                       Chưa có sự kiện nào
                     </td>
                   </tr>
@@ -194,5 +228,6 @@ const DashboardPage = () => {
     </DashboardLayout>
   );
 };
+
 
 export default DashboardPage;
