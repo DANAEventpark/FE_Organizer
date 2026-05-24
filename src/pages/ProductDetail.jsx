@@ -16,35 +16,43 @@ const ProductDetail = () => {
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchEventDetail = async () => {
-      try {
-        setLoading(true);
-        
-        // 🔥 XỬ LÝ TRIỆT ĐỂ LỖI ID: Loại bỏ hoàn toàn dấu ":" và các ký tự thừa dính sau nó
-        let cleanId = id ? id.toString() : '';
-        if (cleanId.includes(':')) {
-          // Tách chuỗi theo dấu ":" và tìm phần tử đầu tiên là số hợp lệ
-          const parts = cleanId.split(':');
-          cleanId = parts.find(part => part && !isNaN(part)) || parts[0];
-        }
-        
-        // Đảm bảo id sau khi lọc là một chuỗi số sạch (Ví dụ: "1", "2")
-        cleanId = cleanId.trim();
+    useEffect(() => {
+        const fetchEventDetail = async () => {
+            try {
+                // XỬ LÝ TRIỆT ĐỂ LỖI ID: Loại bỏ hoàn toàn dấu ":" và các ký tự thừa dính sau nó
+                let cleanId = id ? id.toString() : '';
+                if (cleanId.includes(':')) {
+                    // Tách chuỗi theo dấu ":" và tìm phần tử đầu tiên là số hợp lệ
+                    const parts = cleanId.split(':');
+                    cleanId = parts.find(part => part && !isNaN(part)) || parts[0];
+                }
+                
+                // Đảm bảo id sau khi lọc là một chuỗi số sạch (Ví dụ: "1", "2")
+                cleanId = cleanId.trim();
 
-        const response = await organizerApi.getEventDetail(cleanId);
-        if (response.success) {
-          setEventData(response.data);
-        }
-      } catch (error) {
-        console.error("Lỗi khi lấy chi tiết sự kiện:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+                const response = await organizerApi.getEventDetail(cleanId);
+                if (response.success) {
+                    setEventData(response.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy chi tiết sự kiện:", error);
+            } finally {
+                setLoading(false); // Make sure it stops loading so polling doesn't flash
+            }
+        };
 
-    if (id) fetchEventDetail();
-  }, [id]);
+        if (id) {
+            setLoading(true); // Initial loading
+            fetchEventDetail();
+            
+            // Polling every 3 seconds for real-time updates without reloading
+            const intervalId = setInterval(() => {
+                fetchEventDetail();
+            }, 3000);
+
+            return () => clearInterval(intervalId);
+        }
+    }, [id]);
 
   // ─── TRANH TRẠNG LOADING RESPONSIVE 
   if (loading) {
