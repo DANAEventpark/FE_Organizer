@@ -8,6 +8,8 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import EventInformation from '../components/layout/EventInformation';
 import EventOverview from '../components/layout/EventOverview';
 import AttendeeList from '../components/layout/AttendeeList';
+import EventModal from '../components/modals/EventModal';
+import CancelEventModal from '../components/modals/CancelEventModal';
 
 const ProductDetail = () => {
   const { id } = useParams(); 
@@ -15,44 +17,63 @@ const ProductDetail = () => {
 
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-    useEffect(() => {
-        const fetchEventDetail = async () => {
-            try {
-                // XỬ LÝ TRIỆT ĐỂ LỖI ID: Loại bỏ hoàn toàn dấu ":" và các ký tự thừa dính sau nó
-                let cleanId = id ? id.toString() : '';
-                if (cleanId.includes(':')) {
-                    // Tách chuỗi theo dấu ":" và tìm phần tử đầu tiên là số hợp lệ
-                    const parts = cleanId.split(':');
-                    cleanId = parts.find(part => part && !isNaN(part)) || parts[0];
-                }
-                
-                // Đảm bảo id sau khi lọc là một chuỗi số sạch (Ví dụ: "1", "2")
-                cleanId = cleanId.trim();
+  const fetchEventDetail = async () => {
+    try {
+      let cleanId = id ? id.toString() : '';
+      if (cleanId.includes(':')) {
+        const parts = cleanId.split(':');
+        cleanId = parts.find(part => part && !isNaN(part)) || parts[0];
+      }
+      cleanId = cleanId.trim();
 
-                const response = await organizerApi.getEventDetail(cleanId);
-                if (response.success) {
-                    setEventData(response.data);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy chi tiết sự kiện:", error);
-            } finally {
-                setLoading(false); // Make sure it stops loading so polling doesn't flash
-            }
-        };
+      const response = await organizerApi.getEventDetail(cleanId);
+      if (response.success) {
+        setEventData(response.data);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy chi tiết sự kiện:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (id) {
-            setLoading(true); // Initial loading
-            fetchEventDetail();
-            
-            // Polling every 3 seconds for real-time updates without reloading
-            const intervalId = setInterval(() => {
-                fetchEventDetail();
-            }, 3000);
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      fetchEventDetail();
+      
+      const intervalId = setInterval(() => {
+          fetchEventDetail();
+      }, 3000);
 
-            return () => clearInterval(intervalId);
-        }
-    }, [id]);
+      return () => clearInterval(intervalId);
+    }
+  }, [id]);
+
+  const handlePublish = async () => {
+    if (window.confirm("Bạn có chắc chắn muốn đăng (publish) sự kiện này?")) {
+      setActionLoading(true);
+      try {
+        await organizerApi.updateEvent(eventData.id, { status: 'published' });
+        fetchEventDetail();
+      } catch (error) {
+        console.error("Lỗi khi publish:", error);
+        alert("Lỗi khi đăng sự kiện");
+      } finally {
+        setActionLoading(false);
+      }
+    }
+  };
+
+  const handleModalSuccess = () => {
+    setIsEventModalOpen(false);
+    setIsCancelModalOpen(false);
+    fetchEventDetail();
+  };
 
   // ─── TRANH TRẠNG LOADING RESPONSIVE 
   if (loading) {
@@ -127,12 +148,33 @@ const ProductDetail = () => {
 
           {/* Nhóm Nút bấm Co giãn theo màn hình  */}
           <div className="flex items-center gap-2 w-full lg:w-auto pt-2 lg:pt-0 border-t border-gray-50 lg:border-none">
-            <button className="flex-1 lg:flex-none bg-[#e96a52] hover:bg-[#d75c46] text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors whitespace-nowrap">
-              <Edit size={16} /> Chỉnh sửa
-            </button>
-            <button className="flex-1 lg:flex-none bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 border border-red-100 transition-colors whitespace-nowrap">
-              <Trash2 size={16} /> Xóa
-            </button>
+            {eventData.status === 'draft' && (
+              <button 
+                onClick={handlePublish}
+                disabled={actionLoading}
+                className="flex-1 lg:flex-none bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors whitespace-nowrap disabled:opacity-50"
+              >
+                Đăng (Publish)
+              </button>
+            )}
+            
+            {eventData.status !== 'published' && eventData.status !== 'cancelled' && (
+              <button 
+                onClick={() => setIsEventModalOpen(true)}
+                className="flex-1 lg:flex-none bg-[#e96a52] hover:bg-[#d75c46] text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors whitespace-nowrap"
+              >
+                <Edit size={16} /> Chỉnh sửa
+              </button>
+            )}
+
+            {eventData.status !== 'cancelled' && (
+              <button 
+                onClick={() => setIsCancelModalOpen(true)}
+                className="flex-1 lg:flex-none bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 border border-red-100 transition-colors whitespace-nowrap"
+              >
+                <Trash2 size={16} /> Xóa / Hủy
+              </button>
+            )}
           </div>
         </div>
 
@@ -183,6 +225,20 @@ const ProductDetail = () => {
 
         </div>
       </div>
+
+      <EventModal 
+        isOpen={isEventModalOpen}
+        onClose={() => setIsEventModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        initialData={eventData}
+      />
+
+      <CancelEventModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        eventData={eventData}
+      />
     </DashboardLayout>
   );
 };
