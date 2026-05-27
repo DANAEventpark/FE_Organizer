@@ -3,49 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import { organizerApi } from '../api/organizer';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import StatusBadge from '../components/common/StatusBadge';
+import ProgressBar from '../components/common/ProgressBar';
 
-const StatusBadge = ({ status }) => {
-  const getStatusConfig = () => {
-    switch(status?.toLowerCase()) {
-      case 'published':
-        return { color: 'text-green-600', bg: 'bg-green-50', dot: 'bg-green-500' };
-      case 'draft':
-        return { color: 'text-gray-600', bg: 'bg-gray-100', dot: 'bg-gray-400' };
-      case 'cancelled':
-        return { color: 'text-red-600', bg: 'bg-red-50', dot: 'bg-red-500' };
-      default:
-        return { color: 'text-gray-600', bg: 'bg-gray-100', dot: 'bg-gray-400' };
-    }
-  };
-  
-  const config = getStatusConfig();
-  return (
-    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.color}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`}></span>
-      {status || 'Unknown'}
-    </div>
-  );
-};
 
-const ProgressBar = ({ current, max }) => {
-  const percentage = max > 0 ? Math.min(Math.round((current / max) * 100), 100) : 0;
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-[#e96a52] rounded-full" 
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-      <span className="text-sm text-gray-600 min-w-[50px]">{current}/{max}</span>
-    </div>
-  );
-};
 
 const MyEventsPage = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handleAction = (e, event, actionType) => {
+    e.stopPropagation();
+    if (event.status === 'done') {
+      alert(`Sự kiện đã hoàn thành và bị khóa, bạn không thể ${actionType}.`);
+      return;
+    }
+    console.log(`${actionType === 'chỉnh sửa' ? 'Edit' : 'Delete'} event`, event.id);
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -121,20 +96,16 @@ const MyEventsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         <div className="flex gap-3">
                           <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }} 
-                            className="hover:text-blue-500 transition-colors" 
-                            title="Chỉnh sửa"
+                            onClick={(e) => handleAction(e, event, 'chỉnh sửa')} 
+                            className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-blue-500'}`}
+                            title={event.status === 'done' ? "Sự kiện đã khóa" : "Chỉnh sửa"}
                           >
                             <Edit size={18} />
                           </button>
                           <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }} 
-                            className="hover:text-red-500 transition-colors" 
-                            title="Xóa"
+                            onClick={(e) => handleAction(e, event, 'xóa')} 
+                            className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-red-500'}`}
+                            title={event.status === 'done' ? "Sự kiện đã khóa" : "Xóa"}
                           >
                             <Trash2 size={18} />
                           </button>

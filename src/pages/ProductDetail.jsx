@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2, Calendar, MapPin, FolderOpen, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, FolderOpen, Clock, Send, XCircle } from 'lucide-react';
 import { organizerApi } from '../api/organizer'; 
 import DashboardLayout from '../components/layout/DashboardLayout';
 
@@ -8,6 +8,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import EventInformation from '../components/layout/EventInformation';
 import EventOverview from '../components/layout/EventOverview';
 import AttendeeList from '../components/layout/AttendeeList';
+import ReviewList from '../components/layout/ReviewList';
 
 const ProductDetail = () => {
   const { id } = useParams(); 
@@ -15,6 +16,24 @@ const ProductDetail = () => {
 
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+
+  const handleUpdateStatus = async (newStatus) => {
+    if (window.confirm(`Bạn có chắc muốn chuyển trạng thái sự kiện sang ${newStatus === 'published' ? 'xuất bản' : 'hủy'}?`)) {
+      setUpdating(true);
+      try {
+        const res = await organizerApi.updateEventStatus(eventData.id, newStatus);
+        if (res.success) {
+          setEventData({ ...eventData, status: newStatus });
+          alert(res.message);
+        }
+      } catch (err) {
+        alert(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật trạng thái.');
+      } finally {
+        setUpdating(false);
+      }
+    }
+  };
 
     useEffect(() => {
         const fetchEventDetail = async () => {
@@ -127,12 +146,43 @@ const ProductDetail = () => {
 
           {/* Nhóm Nút bấm Co giãn theo màn hình  */}
           <div className="flex items-center gap-2 w-full lg:w-auto pt-2 lg:pt-0 border-t border-gray-50 lg:border-none">
-            <button className="flex-1 lg:flex-none bg-[#e96a52] hover:bg-[#d75c46] text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors whitespace-nowrap">
-              <Edit size={16} /> Chỉnh sửa
-            </button>
-            <button className="flex-1 lg:flex-none bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 border border-red-100 transition-colors whitespace-nowrap">
-              <Trash2 size={16} /> Xóa
-            </button>
+            {eventData.status === 'draft' && (
+              <button 
+                onClick={() => handleUpdateStatus('published')}
+                disabled={updating}
+                className="flex-1 lg:flex-none bg-[#e96a52] hover:bg-[#d75c46] text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors whitespace-nowrap disabled:opacity-50"
+              >
+                <Send size={16} /> Xuất bản (Publish)
+              </button>
+            )}
+            
+            {eventData.status === 'published' && (
+              <button 
+                onClick={() => handleUpdateStatus('cancelled')}
+                disabled={updating}
+                className="flex-1 lg:flex-none bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 border border-red-100 transition-colors whitespace-nowrap disabled:opacity-50"
+              >
+                <XCircle size={16} /> Hủy sự kiện (Cancel)
+              </button>
+            )}
+
+            {eventData.status === 'done' && (
+              <button 
+                disabled={true}
+                className="flex-1 lg:flex-none bg-gray-100 text-gray-400 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed whitespace-nowrap"
+              >
+                Sự kiện đã kết thúc
+              </button>
+            )}
+            
+            {eventData.status === 'cancelled' && (
+              <button 
+                disabled={true}
+                className="flex-1 lg:flex-none bg-red-50 text-red-400 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 cursor-not-allowed border border-red-100 whitespace-nowrap"
+              >
+                Sự kiện đã hủy
+              </button>
+            )}
           </div>
         </div>
 
@@ -158,6 +208,13 @@ const ProductDetail = () => {
               waitlistUsers={eventData.waitlist_users || []}
               confirmedCount={eventData.confirmed_count || 0}
               waitlistCount={eventData.waitlist_count || 0}
+            />
+
+            {/* Khối Danh sách đánh giá từ người dùng */}
+            <ReviewList 
+              reviews={eventData.reviews || []}
+              averageRating={eventData.average_rating}
+              totalReviews={eventData.total_reviews}
             />
           </div>
 

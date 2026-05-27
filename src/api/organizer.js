@@ -24,5 +24,11 @@ export const organizerApi = {
   getEventDetail: async (id) => {
     const response = await client.get(`/organizer/events/${id}`);
     return response.data;
+  },
+
+  // Cập nhật trạng thái sự kiện
+  updateEventStatus: async (id, status) => {
+    const response = await client.put(`/organizer/events/${id}/status`, { status });
+    return response.data;
   }
 };
