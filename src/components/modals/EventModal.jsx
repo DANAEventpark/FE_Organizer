@@ -113,8 +113,8 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl w-full max-w-2xl my-8">
+    <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] flex flex-col">
         <div className="flex justify-between items-center p-6 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <div className="text-red-500">
@@ -124,14 +124,15 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
             </div>
             <h2 className="text-xl font-bold text-gray-900">{isUpdate ? 'Cập nhật sự kiện' : 'Tạo sự kiện mới'}</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-            <div className="md:col-span-2">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-6 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tên sự kiện</label>
               <input
                 type="text"
@@ -259,9 +260,10 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm resize-none"
               ></textarea>
             </div>
+            </div>
           </div>
 
-          <div className="flex justify-center gap-3 pt-4 border-t border-gray-100">
+          <div className="flex justify-center gap-3 p-5 border-t border-gray-100 shrink-0 bg-gray-50/50 rounded-b-2xl">
             <button
               type="button"
               onClick={onClose}
