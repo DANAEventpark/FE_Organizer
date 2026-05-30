@@ -167,7 +167,7 @@ const DashboardPage = () => {
 
                       {/* Ngày diễn ra */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(event.start_time).toLocaleDateString('vi-VN')}
+                        {new Date(event.start_time.replace(/-/g, '/')).toLocaleDateString('vi-VN')}
                       </td>
 
                       {/* Tiến độ đăng ký */}

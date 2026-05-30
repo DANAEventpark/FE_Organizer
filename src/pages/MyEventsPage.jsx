@@ -167,7 +167,7 @@ const MyEventsPage = () => {
                         {event.title}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(event.start_time).toLocaleDateString('vi-VN')}
+                        {new Date(event.start_time.replace(/-/g, '/')).toLocaleDateString('vi-VN')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap w-64" onClick={(e) => e.stopPropagation()}>
                         <ProgressBar current={event.registrations_count || 0} max={event.capacity || 0} />
