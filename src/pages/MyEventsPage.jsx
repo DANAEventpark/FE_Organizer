@@ -187,7 +187,7 @@ const MyEventsPage = () => {
                           <button 
                             onClick={(e) => handleDelete(event, e)}
                             className={`transition-colors ${event.status === 'cancelled' ? 'text-gray-300 cursor-not-allowed' : 'hover:text-red-500'}`}
-                            title={event.status === 'cancelled' ? 'Sự kiện đã hủy' : 'Xóa / Hủy'}
+                            title={event.status === 'cancelled' ? 'Sự kiện đã hủy' : 'Hủy sự kiện'}
                           >
                             <Trash2 size={18} />
                           </button>

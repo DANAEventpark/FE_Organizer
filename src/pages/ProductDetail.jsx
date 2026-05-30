@@ -172,7 +172,7 @@ const ProductDetail = () => {
                 onClick={() => setIsCancelModalOpen(true)}
                 className="flex-1 lg:flex-none bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 border border-red-100 transition-colors whitespace-nowrap"
               >
-                <Trash2 size={16} /> Xóa / Hủy
+                <Trash2 size={16} /> Hủy sự kiện
               </button>
             )}
           </div>
