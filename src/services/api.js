@@ -27,6 +27,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // Get current language from localStorage
+    const lang = localStorage.getItem('i18nextLng') || 'vi'
+    if (config.headers) {
+      config.headers['Accept-Language'] = lang
+    }
+    
     return config
   },
   (error) => Promise.reject(error)

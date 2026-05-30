@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { organizerApi } from '../api/organizer';
 import DashboardLayout from '../components/layout/DashboardLayout';
 
@@ -44,6 +45,7 @@ const ProgressBar = ({ current, max }) => {
 
 const MyEventsPage = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -82,7 +84,7 @@ const MyEventsPage = () => {
             <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center">
               <Calendar size={20} />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Tất cả sự kiện</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('my_events_page.title')}</h1>
           </div>
         </div>
 
@@ -91,11 +93,11 @@ const MyEventsPage = () => {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50/80">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tên sự kiện</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ngày</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Đăng ký</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hành động</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.event_name')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.date')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.registration')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.status')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.action')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -110,7 +112,7 @@ const MyEventsPage = () => {
                         {event.title}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(event.start_time).toLocaleDateString('vi-VN')}
+                        {new Date(event.start_time).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap w-64" onClick={(e) => e.stopPropagation()}>
                         <ProgressBar current={event.registrations_count || 0} max={event.capacity || 0} />
@@ -125,7 +127,7 @@ const MyEventsPage = () => {
                               e.stopPropagation();
                             }} 
                             className="hover:text-blue-500 transition-colors" 
-                            title="Chỉnh sửa"
+                            title={t('dashboard.table.edit')}
                           >
                             <Edit size={18} />
                           </button>
@@ -134,7 +136,7 @@ const MyEventsPage = () => {
                               e.stopPropagation();
                             }} 
                             className="hover:text-red-500 transition-colors" 
-                            title="Xóa"
+                            title={t('dashboard.table.delete')}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -145,7 +147,7 @@ const MyEventsPage = () => {
                 ) : (
                   <tr>
                     <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                      Bạn chưa tạo sự kiện nào.
+                      {t('my_events_page.no_events')}
                     </td>
                   </tr>
                 )}

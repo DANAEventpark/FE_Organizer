@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { registerApi } from '../api/auth';
 
 const RegisterPage = () => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -23,30 +25,30 @@ const RegisterPage = () => {
     
     // Email validation
     if (!form.email) {
-      newErrors.email = 'Vui lòng nhập email';
+      newErrors.email = t('register.error_email_required');
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('register.error_email_invalid');
     }
 
     // Name (Organization Name) validation
     if (!form.name) {
-      newErrors.name = 'Vui lòng nhập tên tổ chức';
+      newErrors.name = t('register.error_name_required');
     } else if (form.name.length < 2) {
-      newErrors.name = 'Tên tối thiểu 2 ký tự';
+      newErrors.name = t('register.error_name_min');
     }
 
     // Phone validation
     if (!form.phone) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại';
+      newErrors.phone = t('register.error_phone_required');
     } else if (!/^[0-9]{10}$/.test(form.phone)) {
-      newErrors.phone = 'Số điện thoại phải có 10 chữ số';
+      newErrors.phone = t('register.error_phone_invalid');
     }
 
     // Password validation
     if (!form.password) {
-      newErrors.password = 'Vui lòng nhập mật khẩu';
+      newErrors.password = t('register.error_password_required');
     } else if (form.password.length < 8) {
-      newErrors.password = 'Mật khẩu tối thiểu 8 ký tự';
+      newErrors.password = t('register.error_password_min');
     }
 
     setErrors(newErrors);
@@ -71,7 +73,7 @@ const RegisterPage = () => {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      setApiError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      setApiError(err.response?.data?.message || t('register.error_fallback'));
     } finally {
       setLoading(false);
     }
@@ -97,11 +99,11 @@ const RegisterPage = () => {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Tạo tài khoản</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('register.title')}</h1>
             <p className="text-sm text-gray-600 mt-2">
-              Đăng ký với tư cách <span className="text-[#2E6E7E] font-medium">nhà tổ chức</span>
+              {t('register.subtitle_prefix')}<span className="text-[#2E6E7E] font-medium">{t('register.subtitle_role')}</span>
             </p>
-            <p className="text-xs text-gray-400 mt-1">Tham gia cộng đồng EventSpark ngay hôm nay</p>
+            <p className="text-xs text-gray-400 mt-1">{t('register.tagline')}</p>
           </div>
 
           {apiError && (
@@ -112,14 +114,14 @@ const RegisterPage = () => {
 
           {success && (
             <div className="mb-6 p-3 bg-green-50 border border-green-300 text-green-700 text-sm rounded-lg">
-              Đăng ký thành công! Đang chuyển hướng...
+              {t('register.success_msg')}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('register.email_label')}</label>
               <input
                 name="email"
                 type="email"
@@ -135,11 +137,11 @@ const RegisterPage = () => {
 
             {/* Tên tổ chức Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tên tổ chức</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('register.org_name_label')}</label>
               <input
                 name="name"
                 type="text"
-                placeholder="Tên doanh nghiệp / Tổ chức"
+                placeholder={t('register.org_name_placeholder')}
                 value={form.name}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 border rounded-xl bg-gray-50/50 focus:ring-2 focus:ring-[#2E6E7E] focus:border-transparent outline-none transition-all ${
@@ -151,7 +153,7 @@ const RegisterPage = () => {
 
             {/* Số điện thoại Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Số điện thoại</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('register.phone_label')}</label>
               <input
                 name="phone"
                 type="tel"
@@ -167,7 +169,7 @@ const RegisterPage = () => {
 
             {/* Mật khẩu Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('register.password_label')}</label>
               <div className="relative">
                 <input
                   name="password"
@@ -201,18 +203,18 @@ const RegisterPage = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Đang xử lý...
+                  {t('register.processing')}
                 </>
               ) : (
-                'Đăng ký'
+                t('register.submit_btn')
               )}
             </button>
           </form>
 
           <div className="mt-8 text-center text-sm">
-            <span className="text-gray-500">Bạn đã có tài khoản? </span>
+            <span className="text-gray-500">{t('register.has_account')}</span>
             <Link to="/login" className="text-blue-500 font-medium hover:underline">
-              Đăng nhập ngay
+              {t('register.login_now')}
             </Link>
           </div>
         </div>
@@ -238,20 +240,20 @@ const RegisterPage = () => {
 
           <div className="mt-auto pb-4 lg:pb-12">
             <h2 className="text-2xl lg:text-4xl font-bold mb-3 leading-tight">
-              Quản lý sự kiện chuyên nghiệp
+              {t('register.tagline_img')}
             </h2>
             <p className="text-sm lg:text-base text-gray-200 mb-6 max-w-md">
-              Công cụ mạnh mẽ giúp bạn tổ chức, quảng bá và theo dõi hiệu quả sự kiện tại Đà Nẵng
+              {t('register.desc_img')}
             </p>
             <div className="flex flex-wrap gap-2">
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Quản lý tinh gọn
+                {t('register.badge_img_1')}
               </span>
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Tiếp cận hàng nghìn người
+                {t('register.badge_img_2')}
               </span>
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Thống kê thời gian thực
+                {t('register.badge_img_3')}
               </span>
             </div>
           </div>

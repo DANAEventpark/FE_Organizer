@@ -1,0 +1,120 @@
+{
+  "sidebar": {
+    "menu": "Menu",
+    "account": "Tài khoản",
+    "dashboard": "Dashboard",
+    "my_events": "Sự kiện của tôi",
+    "settings": "Cài đặt",
+    "logout": "Đăng xuất"
+  },
+  "login": {
+    "image_title": "Quản lý sự kiện Đà Nẵng dễ dàng",
+    "image_subtitle": "Công cụ mạnh mẽ để tạo, quản lý và theo dõi sự kiện của bạn hiệu quả",
+    "badge_1": "Tạo sự kiện nhanh",
+    "badge_2": "Thống kê chi tiết",
+    "badge_3": "Hỗ trợ 24/7",
+    "title": "Chào mừng trở lại",
+    "subtitle": "Đăng nhập với tư cách Nhà tổ chức",
+    "email": "Email",
+    "password": "Password",
+    "remember_me": "Ghi nhớ đăng nhập",
+    "forgot_password": "Quên mật khẩu ?",
+    "submit": "Đăng nhập",
+    "or": "Hoặc",
+    "google_login": "Đăng nhập bằng Google",
+    "no_account": "Chưa có tài khoản?",
+    "register_now": "Đăng ký ngay",
+    "no_organizer_permission": "Tài khoản không có quyền truy cập nhà tổ chức.",
+    "failed_fallback": "Có lỗi xảy ra khi đăng nhập.",
+    "google_failed": "Có lỗi xảy ra khi đăng nhập bằng Google."
+  },
+  "register": {
+    "title": "Tạo tài khoản",
+    "subtitle_prefix": "Đăng ký với tư cách ",
+    "subtitle_role": "nhà tổ chức",
+    "tagline": "Tham gia cộng đồng EventSpark ngay hôm nay",
+    "email_label": "Email",
+    "org_name_label": "Tên tổ chức",
+    "org_name_placeholder": "Tên doanh nghiệp / Tổ chức",
+    "phone_label": "Số điện thoại",
+    "password_label": "Mật khẩu",
+    "submit_btn": "Đăng ký",
+    "processing": "Đang xử lý...",
+    "has_account": "Bạn đã có tài khoản? ",
+    "login_now": "Đăng nhập ngay",
+    "success_msg": "Đăng ký thành công! Đang chuyển hướng...",
+    "tagline_img": "Quản lý sự kiện chuyên nghiệp",
+    "desc_img": "Công cụ mạnh mẽ giúp bạn tổ chức, quảng bá và theo dõi hiệu quả sự kiện tại Đà Nẵng",
+    "badge_img_1": "Quản lý tinh gọn",
+    "badge_img_2": "Tiếp cận hàng nghìn người",
+    "badge_img_3": "Thống kê thời gian thực",
+    "error_email_required": "Vui lòng nhập email",
+    "error_email_invalid": "Email không hợp lệ",
+    "error_name_required": "Vui lòng nhập tên tổ chức",
+    "error_name_min": "Tên tối thiểu 2 ký tự",
+    "error_phone_required": "Vui lòng nhập số điện thoại",
+    "error_phone_invalid": "Số điện thoại phải có 10 chữ số",
+    "error_password_required": "Vui lòng nhập mật khẩu",
+    "error_password_min": "Mật khẩu tối thiểu 8 ký tự",
+    "error_fallback": "Đăng ký thất bại. Vui lòng thử lại."
+  },
+  "dashboard": {
+    "good_morning": "Chào buổi sáng, {{name}} 👋",
+    "create_event": "Tạo sự kiện",
+    "total_events": "Tổng sự kiện",
+    "registrations": "Người đăng ký",
+    "rating_points": "Điểm đánh giá",
+    "my_events_title": "Sự kiện của tôi",
+    "view_all": "Xem tất cả",
+    "loading": "Đang tải...",
+    "table": {
+      "event_name": "Tên sự kiện",
+      "date": "Ngày",
+      "registration": "Đăng ký",
+      "status": "Trạng thái",
+      "action": "Hành động",
+      "no_events": "Chưa có sự kiện nào",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa"
+    }
+  },
+  "my_events_page": {
+    "title": "Tất cả sự kiện",
+    "no_events": "Bạn chưa tạo sự kiện nào."
+  },
+  "product_detail": {
+    "loading": "Đang tải thông tin chi tiết sự kiện...",
+    "not_found_title": "Không tìm thấy dữ liệu sự kiện!",
+    "not_found_desc": "Vui lòng kiểm tra lại đường dẫn hoặc sự kiện này có thể đã bị xóa khỏi hệ thống.",
+    "back_dashboard": "Quay lại Dashboard",
+    "breadcrumb_dashboard": "Dashboard",
+    "category_unclassified": "Chưa phân loại",
+    "btn_edit": "Chỉnh sửa",
+    "btn_delete": "Xóa",
+    "desc_title": "📝 Mô tả chi tiết sự kiện",
+    "no_desc": "Chưa có mô tả chi tiết cụ thể cho sự kiện này.",
+    "attendee_list": {
+      "title": "NGƯỜI THAM DỰ",
+      "registered": "Đã đăng ký ({{count}})",
+      "waitlist": "Danh sách chờ ({{count}})",
+      "name": "HỌ TÊN",
+      "email": "EMAIL",
+      "reg_date": "NGÀY ĐĂNG KÝ",
+      "empty_confirmed": "Chưa có thành viên nào đăng ký chính thức.",
+      "empty_waitlist": "Hiện tại danh sách chờ đang trống."
+    },
+    "info": {
+      "title": "THÔNG TIN SỰ KIỆN",
+      "category": "Danh mục",
+      "location": "Địa điểm",
+      "date": "Ngày diễn ra",
+      "time": "Thời gian"
+    },
+    "overview": {
+      "title": "📊 Tổng quan sự kiện",
+      "registered": "Đã đăng ký",
+      "waitlist": "Danh sách chờ",
+      "created_date": "Ngày tạo sự kiện"
+    }
+  }
+}
