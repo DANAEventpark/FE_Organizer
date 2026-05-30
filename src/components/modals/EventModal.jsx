@@ -46,7 +46,8 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
       if (initialData) {
         const parseDate = (dateString) => {
           if (!dateString) return null;
-          const d = new Date(dateString);
+          const safeStr = typeof dateString === 'string' ? dateString.replace(/-/g, '/') : dateString;
+          const d = new Date(safeStr);
           return isNaN(d.getTime()) ? null : d;
         };
 

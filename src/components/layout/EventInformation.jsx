@@ -1,13 +1,10 @@
 const EventInformation = ({ categoryName, location, startTime, endTime }) => {
-    // Hàm xử lý an toàn để tránh lỗi Invalid Date
+    // Hàm xử lý an toàn để tránh lỗi và sự khác biệt múi giờ giữa các trình duyệt
     const parseDate = (dateStr) => {
         if (!dateStr) return null;
-        // Cố gắng parse ngày tháng nguyên bản trước (chuẩn ISO 8601 từ backend Laravel)
-        let date = new Date(dateStr);
-        if (!isNaN(date.getTime())) return date;
-        
-        // Dành cho một số trình duyệt cũ (vd: Safari) không parse được định dạng "YYYY-MM-DD HH:mm:ss"
-        date = new Date(dateStr.replace(/-/g, '/'));
+        // Luôn thay thế '-' bằng '/' để đảm bảo trình duyệt luôn parse theo Local Time và không bị Invalid Date trên Safari
+        const safeStr = typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr;
+        const date = new Date(safeStr);
         return isNaN(date.getTime()) ? null : date;
     };
 
