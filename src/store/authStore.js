@@ -9,6 +9,7 @@ export const useAuthStore = create(
 
       login: (user, token) => set({ user, token }),
       logout: () => set({ user: null, token: null }),
+      setUser: (user) => set({ user }),
 
       setAuth: (user, token) => set({ user, token }),
       clearAuth: () => set({ user: null, token: null }),
