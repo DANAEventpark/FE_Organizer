@@ -9,6 +9,7 @@ import ProfilePage from '@/pages/ProfilePage'
 import NotFoundPage from '@/pages/errors/NotFoundPage'
 import ForbiddenPage from '@/pages/errors/ForbiddenPage'
 import ServerErrorPage from '@/pages/errors/ServerErrorPage'
+import VerifyEmailPage from '@/pages/VerifyEmailPage'
 
 /**
  * Router Configuration — FE_Organizer
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/verify-email',
+    element: <VerifyEmailPage />
   },
 
   {

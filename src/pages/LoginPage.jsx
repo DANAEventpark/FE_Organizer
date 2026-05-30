@@ -1,7 +1,7 @@
 import  { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
-import { loginApi, loginWithGoogleApi } from '../api/auth';
+import { loginApi, loginWithGoogleApi, resendVerificationEmailApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebase';
@@ -11,6 +11,8 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isUnverified, setIsUnverified] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState('');
   
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
@@ -18,6 +20,8 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setResendSuccess('');
+    setIsUnverified(false);
     setLoading(true);
 
     try {
@@ -34,7 +38,22 @@ const LoginPage = () => {
       login(user, token);
       navigate('/dashboard');
     } catch (err) {
+      if (err.response?.data?.error_code === 'EMAIL_UNVERIFIED') {
+        setIsUnverified(true);
+      }
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đăng nhập.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    try {
+      setLoading(true);
+      await resendVerificationEmailApi({ email });
+      setResendSuccess('Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Không thể gửi lại email.');
     } finally {
       setLoading(false);
     }
@@ -173,7 +192,23 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
+              <div className="mt-2 text-center">
+                <p className="text-red-500 text-sm">{error}</p>
+                {isUnverified && (
+                  <button
+                    type="button"
+                    onClick={handleResendEmail}
+                    disabled={loading}
+                    className="mt-2 text-sm text-[#E53E3E] font-medium hover:underline focus:outline-none"
+                  >
+                    Bấm vào đây để gửi lại email xác thực
+                  </button>
+                )}
+              </div>
+            )}
+
+            {resendSuccess && (
+              <p className="text-green-600 text-sm mt-2 text-center font-medium bg-green-50 py-2 rounded-md border border-green-200">{resendSuccess}</p>
             )}
 
             <button

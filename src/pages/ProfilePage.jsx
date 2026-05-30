@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { updateProfileInfoApi, updatePasswordApi } from '../api/profile';
-import { storage } from '../services/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { User, Lock, Camera, Loader2, Save } from 'lucide-react';
+import axios from 'axios';
 import DashboardLayout from '../components/layout/DashboardLayout';
 
 const ProfilePage = () => {
@@ -41,9 +40,11 @@ const ProfilePage = () => {
       let avatarUrl = infoForm.avatar;
       
       if (imageFile) {
-        const fileRef = ref(storage, `avatars/${user.id}_${Date.now()}`);
-        await uploadBytes(fileRef, imageFile);
-        avatarUrl = await getDownloadURL(fileRef);
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        const imgbbResponse = await axios.post('https://api.imgbb.com/1/upload?key=a7045f692ebb94f19d042ac48661a65c', formData);
+        avatarUrl = imgbbResponse.data.data.url;
       }
       
       const payload = {
@@ -166,7 +167,7 @@ const ProfilePage = () => {
                     <input
                       type="text"
                       required
-                      value={infoForm.name}
+                      value={infoForm.name || ''}
                       onChange={(e) => setInfoForm({...infoForm, name: e.target.value})}
                       className="w-full border border-gray-200 bg-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#e96a52] focus:border-transparent outline-none transition-colors"
                     />
@@ -175,7 +176,7 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Số điện thoại</label>
                     <input
                       type="tel"
-                      value={infoForm.phone}
+                      value={infoForm.phone || ''}
                       onChange={(e) => setInfoForm({...infoForm, phone: e.target.value})}
                       className="w-full border border-gray-200 bg-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#e96a52] focus:border-transparent outline-none transition-colors"
                     />
