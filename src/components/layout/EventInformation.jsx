@@ -21,6 +21,16 @@ const EventInformation = ({ categoryName, location, startTime, endTime }) => {
         return dateObject.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     };
 
+    const isSameDay = dateObj && endDateObj && 
+        dateObj.getFullYear() === endDateObj.getFullYear() &&
+        dateObj.getMonth() === endDateObj.getMonth() &&
+        dateObj.getDate() === endDateObj.getDate();
+
+    const formatDateTimeCombo = (dateObject) => {
+        if (!dateObject) return '';
+        return `${formatTime(dateObject)}, ${dateObject.toLocaleDateString('vi-VN')}`;
+    };
+
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
             <h3 className="font-bold text-gray-800 border-b border-gray-50 pb-2">THÔNG TIN SỰ KIỆN</h3>
@@ -43,25 +53,41 @@ const EventInformation = ({ categoryName, location, startTime, endTime }) => {
                 </div>
             </div>
 
-            {/* Ngày diễn ra */}
-            <div className="flex items-start space-x-3">
-                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">📅</div>
-                <div>
-                    <p className="text-xs text-gray-400 font-medium">Ngày diễn ra</p>
-                    <p className="text-sm font-semibold text-gray-800">{formattedDate}</p>
-                </div>
-            </div>
+            {isSameDay ? (
+                <>
+                    {/* Ngày diễn ra (Cùng ngày) */}
+                    <div className="flex items-start space-x-3">
+                        <div className="p-2 bg-blue-50 rounded-lg text-blue-600">📅</div>
+                        <div>
+                            <p className="text-xs text-gray-400 font-medium">Ngày diễn ra</p>
+                            <p className="text-sm font-semibold text-gray-800">{formattedDate}</p>
+                        </div>
+                    </div>
 
-            {/* Thời gian */}
-            <div className="flex items-start space-x-3">
-                <div className="p-2 bg-orange-50 rounded-lg text-orange-600">⏰</div>
-                <div>
-                    <p className="text-xs text-gray-400 font-medium">Thời gian</p>
-                    <p className="text-sm font-semibold text-gray-800">
-                        {dateObj && endDateObj ? `${formatTime(dateObj)} - ${formatTime(endDateObj)}` : 'N/A'}
-                    </p>
+                    {/* Thời gian (Cùng ngày) */}
+                    <div className="flex items-start space-x-3">
+                        <div className="p-2 bg-orange-50 rounded-lg text-orange-600">⏰</div>
+                        <div>
+                            <p className="text-xs text-gray-400 font-medium">Thời gian</p>
+                            <p className="text-sm font-semibold text-gray-800">
+                                {dateObj && endDateObj ? `${formatTime(dateObj)} - ${formatTime(endDateObj)}` : 'N/A'}
+                            </p>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                /* Kéo dài nhiều ngày */
+                <div className="flex items-start space-x-3">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">📅</div>
+                    <div>
+                        <p className="text-xs text-gray-400 font-medium">Thời gian diễn ra</p>
+                        <p className="text-sm font-semibold text-gray-800">
+                            {dateObj ? formatDateTimeCombo(dateObj) : 'N/A'}
+                            {endDateObj ? ` - ${formatDateTimeCombo(endDateObj)}` : ''}
+                        </p>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
