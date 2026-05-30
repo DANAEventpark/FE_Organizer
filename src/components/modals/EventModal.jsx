@@ -4,7 +4,7 @@ import { organizerApi } from '../../api/organizer';
 import client from '../../api/client'; // Dùng để fetch categories
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { format } from 'date-fns';
+import { format, subHours } from 'date-fns';
 
 const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   const isUpdate = !!initialData;
@@ -184,7 +184,11 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Ngày bắt đầu</label>
               <DatePicker
                 selected={formData.start_time}
-                onChange={(date) => setFormData(prev => ({ ...prev, start_time: date }))}
+                onChange={(date) => setFormData(prev => ({
+                  ...prev,
+                  start_time: date,
+                  registration_deadline: date ? subHours(date, 24) : null
+                }))}
                 showTimeSelect
                 timeFormat="HH:mm"
                 timeIntervals={15}
@@ -223,10 +227,10 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
                 timeFormat="HH:mm"
                 timeIntervals={15}
                 dateFormat="dd/MM/yyyy HH:mm"
-                placeholderText="dd/mm/yyyy hh:mm"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                placeholderText="Tự động điền (trước 24h)"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none transition-colors text-sm bg-gray-100 cursor-not-allowed text-gray-500"
                 wrapperClassName="w-full"
-                isClearable
+                disabled
               />
             </div>
 
