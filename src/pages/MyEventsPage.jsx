@@ -91,6 +91,10 @@ const MyEventsPage = () => {
       alert('Không thể chỉnh sửa sự kiện đã được đăng.');
       return;
     }
+    if (event.status === 'cancelled') {
+      alert('Không thể chỉnh sửa sự kiện đã bị hủy.');
+      return;
+    }
     setSelectedEvent(event);
     setIsEventModalOpen(true);
   };
@@ -175,8 +179,8 @@ const MyEventsPage = () => {
                         <div className="flex gap-3">
                           <button 
                             onClick={(e) => handleEdit(event, e)}
-                            className={`transition-colors ${event.status === 'published' ? 'text-gray-300 cursor-not-allowed' : 'hover:text-blue-500'}`}
-                            title={event.status === 'published' ? 'Không thể chỉnh sửa sự kiện đã đăng' : 'Chỉnh sửa'}
+                            className={`transition-colors ${(event.status === 'published' || event.status === 'cancelled') ? 'text-gray-300 cursor-not-allowed' : 'hover:text-blue-500'}`}
+                            title={event.status === 'published' ? 'Không thể chỉnh sửa sự kiện đã đăng' : event.status === 'cancelled' ? 'Không thể chỉnh sửa sự kiện đã hủy' : 'Chỉnh sửa'}
                           >
                             <Edit size={18} />
                           </button>
