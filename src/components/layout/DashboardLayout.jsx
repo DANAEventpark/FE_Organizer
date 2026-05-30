@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Calendar, Settings, LogOut, Menu, X, Plus } from 'lucide-react';
 import logoImg from '../../assets/logo.jpg';
 import { useAuthStore } from '../../store/authStore';
 
@@ -73,6 +73,18 @@ const DashboardLayout = ({ children }) => {
                   </Link>
                 );
               })}
+              
+              {/* Nút Tạo sự kiện ở Sidebar */}
+              <button
+                onClick={() => {
+                  setIsSidebarOpen(false);
+                  navigate('/events?action=create');
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-white/80 hover:bg-white/10 hover:text-white"
+              >
+                <Plus size={20} />
+                Tạo sự kiện
+              </button>
             </nav>
           </div>
 

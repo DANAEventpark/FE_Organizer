@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import { organizerApi } from '../api/organizer';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import EventModal from '../components/modals/EventModal';
+import CancelEventModal from '../components/modals/CancelEventModal';
 
 const StatusBadge = ({ status }) => {
   const getStatusConfig = () => {
@@ -44,25 +46,74 @@ const ProgressBar = ({ current, max }) => {
 
 const MyEventsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await organizerApi.getAllEvents();
+      if (response.success) {
+        setEvents(response.data);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách sự kiện:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await organizerApi.getAllEvents();
-        if (response.success) {
-          setEvents(response.data);
-        }
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách sự kiện:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('action') === 'create') {
+      setSelectedEvent(null);
+      setIsEventModalOpen(true);
+      // Xóa query param để không tự mở lại khi refresh
+      navigate('/events', { replace: true });
+    }
+  }, [location.search, navigate]);
+
+  const handleCreateNew = () => {
+    setSelectedEvent(null);
+    setIsEventModalOpen(true);
+  };
+
+  const handleEdit = (event, e) => {
+    e.stopPropagation();
+    if (event.status === 'published') {
+      alert('Không thể chỉnh sửa sự kiện đã được đăng.');
+      return;
+    }
+    if (event.status === 'cancelled') {
+      alert('Không thể chỉnh sửa sự kiện đã bị hủy.');
+      return;
+    }
+    setSelectedEvent(event);
+    setIsEventModalOpen(true);
+  };
+
+  const handleDelete = (event, e) => {
+    e.stopPropagation();
+    if (event.status === 'cancelled') {
+      alert('Sự kiện đã bị hủy.');
+      return;
+    }
+    setSelectedEvent(event);
+    setIsCancelModalOpen(true);
+  };
+
+  const handleModalSuccess = () => {
+    setIsEventModalOpen(false);
+    setIsCancelModalOpen(false);
+    fetchEvents();
+  };
 
   if (loading) {
     return (
@@ -84,6 +135,12 @@ const MyEventsPage = () => {
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Tất cả sự kiện</h1>
           </div>
+          <button 
+            onClick={handleCreateNew}
+            className="bg-[#e96a52] hover:bg-[#d75c46] text-white px-5 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors"
+          >
+            + Tạo sự kiện
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -110,7 +167,7 @@ const MyEventsPage = () => {
                         {event.title}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(event.start_time).toLocaleDateString('vi-VN')}
+                        {new Date(event.start_time.replace(/-/g, '/')).toLocaleDateString('vi-VN')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap w-64" onClick={(e) => e.stopPropagation()}>
                         <ProgressBar current={event.registrations_count || 0} max={event.capacity || 0} />
@@ -121,20 +178,16 @@ const MyEventsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         <div className="flex gap-3">
                           <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }} 
-                            className="hover:text-blue-500 transition-colors" 
-                            title="Chỉnh sửa"
+                            onClick={(e) => handleEdit(event, e)}
+                            className={`transition-colors ${(event.status === 'published' || event.status === 'cancelled') ? 'text-gray-300 cursor-not-allowed' : 'hover:text-blue-500'}`}
+                            title={event.status === 'published' ? 'Không thể chỉnh sửa sự kiện đã đăng' : event.status === 'cancelled' ? 'Không thể chỉnh sửa sự kiện đã hủy' : 'Chỉnh sửa'}
                           >
                             <Edit size={18} />
                           </button>
                           <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }} 
-                            className="hover:text-red-500 transition-colors" 
-                            title="Xóa"
+                            onClick={(e) => handleDelete(event, e)}
+                            className={`transition-colors ${event.status === 'cancelled' ? 'text-gray-300 cursor-not-allowed' : 'hover:text-red-500'}`}
+                            title={event.status === 'cancelled' ? 'Sự kiện đã hủy' : 'Hủy sự kiện'}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -154,6 +207,20 @@ const MyEventsPage = () => {
           </div>
         </div>
       </div>
+
+      <EventModal 
+        isOpen={isEventModalOpen} 
+        onClose={() => setIsEventModalOpen(false)} 
+        onSuccess={handleModalSuccess} 
+        initialData={selectedEvent} 
+      />
+
+      <CancelEventModal 
+        isOpen={isCancelModalOpen} 
+        onClose={() => setIsCancelModalOpen(false)} 
+        onSuccess={handleModalSuccess} 
+        eventData={selectedEvent} 
+      />
     </DashboardLayout>
   );
 };
