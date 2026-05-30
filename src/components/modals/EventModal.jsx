@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { organizerApi } from '../../api/organizer';
 import client from '../../api/client'; // Dùng để fetch categories
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { format } from 'date-fns';
 
 const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   const isUpdate = !!initialData;
@@ -12,9 +15,9 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
     title: '',
     category_id: '',
     capacity: '',
-    start_time: '',
-    end_time: '',
-    registration_deadline: '',
+    start_time: null,
+    end_time: null,
+    registration_deadline: null,
     location: '',
     description: '',
     image: '',
@@ -41,22 +44,19 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        // Format datetime-local requires YYYY-MM-DDThh:mm
-        const formatDateForInput = (dateString) => {
-          if (!dateString) return '';
-          // Kiểm tra xem dateString có phải YYYY-MM-DD HH:mm:ss không
+        const parseDate = (dateString) => {
+          if (!dateString) return null;
           const d = new Date(dateString);
-          if (isNaN(d.getTime())) return '';
-          return d.toISOString().slice(0, 16);
+          return isNaN(d.getTime()) ? null : d;
         };
 
         setFormData({
           title: initialData.title || '',
           category_id: initialData.category_id || '',
           capacity: initialData.capacity || '',
-          start_time: formatDateForInput(initialData.start_time),
-          end_time: formatDateForInput(initialData.end_time),
-          registration_deadline: formatDateForInput(initialData.registration_deadline),
+          start_time: parseDate(initialData.start_time),
+          end_time: parseDate(initialData.end_time),
+          registration_deadline: parseDate(initialData.registration_deadline),
           location: initialData.location || '',
           description: initialData.description || '',
           image: initialData.image || '',
@@ -67,9 +67,9 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
           title: '',
           category_id: '',
           capacity: '',
-          start_time: '',
-          end_time: '',
-          registration_deadline: '',
+          start_time: null,
+          end_time: null,
+          registration_deadline: null,
           location: '',
           description: '',
           image: '',
@@ -88,12 +88,17 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Format data for API (Laravel expects YYYY-MM-DD HH:mm:ss ideally, but ISO string works or just let browser send it)
+      // Format data for API
+      const formatDateForApi = (dateObj) => {
+        if (!dateObj) return null;
+        return format(dateObj, 'yyyy-MM-dd HH:mm:ss');
+      };
+
       const dataToSubmit = {
         ...formData,
-        start_time: formData.start_time.replace('T', ' ') + ':00',
-        end_time: formData.end_time.replace('T', ' ') + ':00',
-        registration_deadline: formData.registration_deadline ? formData.registration_deadline.replace('T', ' ') + ':00' : null,
+        start_time: formatDateForApi(formData.start_time),
+        end_time: formatDateForApi(formData.end_time),
+        registration_deadline: formatDateForApi(formData.registration_deadline),
       };
 
       if (isUpdate) {
@@ -175,38 +180,53 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
               />
             </div>
 
-            <div>
+            <div className="flex flex-col">
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Ngày bắt đầu</label>
-              <input
-                type="datetime-local"
-                name="start_time"
-                value={formData.start_time}
-                onChange={handleChange}
+              <DatePicker
+                selected={formData.start_time}
+                onChange={(date) => setFormData(prev => ({ ...prev, start_time: date }))}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={15}
+                dateFormat="dd/MM/yyyy HH:mm"
+                placeholderText="dd/mm/yyyy hh:mm"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                wrapperClassName="w-full"
                 required
+                isClearable
               />
             </div>
 
-            <div>
+            <div className="flex flex-col">
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Ngày kết thúc</label>
-              <input
-                type="datetime-local"
-                name="end_time"
-                value={formData.end_time}
-                onChange={handleChange}
+              <DatePicker
+                selected={formData.end_time}
+                onChange={(date) => setFormData(prev => ({ ...prev, end_time: date }))}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={15}
+                dateFormat="dd/MM/yyyy HH:mm"
+                placeholderText="dd/mm/yyyy hh:mm"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                wrapperClassName="w-full"
                 required
+                isClearable
               />
             </div>
 
-            <div>
+            <div className="flex flex-col">
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Hạn đăng ký</label>
-              <input
-                type="datetime-local"
-                name="registration_deadline"
-                value={formData.registration_deadline}
-                onChange={handleChange}
+              <DatePicker
+                selected={formData.registration_deadline}
+                onChange={(date) => setFormData(prev => ({ ...prev, registration_deadline: date }))}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={15}
+                dateFormat="dd/MM/yyyy HH:mm"
+                placeholderText="dd/mm/yyyy hh:mm"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                wrapperClassName="w-full"
+                isClearable
               />
             </div>
 
