@@ -6,6 +6,9 @@ import DashboardPage from '@/pages/DashboardPage'
 import ProductDetail from '@/pages/ProductDetail'
 import MyEventsPage from '@/pages/MyEventsPage'
 import ProfilePage from '@/pages/ProfilePage'
+import NotFoundPage from '@/pages/errors/NotFoundPage'
+import ForbiddenPage from '@/pages/errors/ForbiddenPage'
+import ServerErrorPage from '@/pages/errors/ServerErrorPage'
 
 /**
  * Router Configuration — FE_Organizer
@@ -43,8 +46,16 @@ const router = createBrowserRouter([
     )
   },
   {
+    path: '/403',
+    element: <ForbiddenPage />
+  },
+  {
+    path: '/500',
+    element: <ServerErrorPage />
+  },
+  {
     path: '*',
-    element: <Navigate to="/dashboard" replace />
+    element: <NotFoundPage />
   },
   {
     path: '/events',
