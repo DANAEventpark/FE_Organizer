@@ -30,5 +30,25 @@ export const organizerApi = {
   updateEventStatus: async (id, status) => {
     const response = await client.put(`/organizer/events/${id}/status`, { status });
     return response.data;
+  },
+
+  // Tạo sự kiện mới
+  createEvent: async (data) => {
+    const response = await client.post('/organizer/events', data);
+    return response.data;
+  },
+
+  // Cập nhật sự kiện
+  updateEvent: async (id, data) => {
+    const response = await client.put(`/organizer/events/${id}`, data);
+    return response.data;
+  },
+
+  // Hủy sự kiện
+  cancelEvent: async (id, cancelReason) => {
+    const response = await client.put(`/organizer/events/${id}/cancel`, {
+      cancel_reason: cancelReason
+    });
+    return response.data;
   }
 };
