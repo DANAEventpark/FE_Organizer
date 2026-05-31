@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, FolderOpen, Clock, Send, XCircle, Edit, Trash2 } from 'lucide-react';
 import { organizerApi } from '../api/organizer'; 
@@ -40,7 +40,7 @@ const ProductDetail = () => {
     }
   };
 
-  const fetchEventDetail = async () => {
+  const fetchEventDetail = useCallback(async () => {
     try {
       let cleanId = id ? id.toString() : '';
       if (cleanId.includes(':')) {
@@ -58,20 +58,14 @@ const ProductDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) {
       setLoading(true);
       fetchEventDetail();
-      
-      const intervalId = setInterval(() => {
-          fetchEventDetail();
-      }, 3000);
-
-      return () => clearInterval(intervalId);
     }
-  }, [id]);
+  }, [id, fetchEventDetail]);
 
   const handlePublish = async () => {
     if (window.confirm("Bạn có chắc chắn muốn đăng (publish) sự kiện này?")) {
