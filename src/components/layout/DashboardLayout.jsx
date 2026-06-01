@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Settings, LogOut, Menu, X, Plus } from 'lucide-react';
+import { LayoutDashboard, Calendar, Settings, LogOut, Menu, X, Plus, Languages } from 'lucide-react';
 import logoImg from '../../assets/logo.jpg';
 import { useAuthStore } from '../../store/authStore';
+import { useTranslation } from 'react-i18next';
 
 const DashboardLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -10,14 +11,23 @@ const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language.toUpperCase();
+
+  const toggleLanguage = () => {
+    const nextLang = currentLang.startsWith("VI") ? "en" : "vi";
+    i18n.changeLanguage(nextLang);
+    localStorage.setItem('i18nextLng', nextLang);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Sự kiện của tôi', icon: Calendar, path: '/events' },
+    { name: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
+    { name: t('sidebar.my_events'), icon: Calendar, path: '/events' },
   ];
 
   return (
@@ -53,7 +63,7 @@ const DashboardLayout = ({ children }) => {
 
           {/* Menu */}
           <div className="px-4 py-2">
-            <p className="text-xs text-gray-500 font-semibold mb-4 px-2 uppercase tracking-wider">Menu</p>
+            <p className="text-xs text-gray-500 font-semibold mb-4 px-2 uppercase tracking-wider">{t('sidebar.menu')}</p>
             <nav className="space-y-2">
               {menuItems.map((item) => {
                 const isActive = pathname === item.path;
@@ -90,8 +100,15 @@ const DashboardLayout = ({ children }) => {
 
           {/* Account */}
           <div className="px-4 mt-8">
-            <p className="text-xs text-gray-500 font-semibold mb-4 px-2 uppercase tracking-wider">Tài khoản</p>
+            <p className="text-xs text-gray-500 font-semibold mb-4 px-2 uppercase tracking-wider">{t('sidebar.account')}</p>
             <nav className="space-y-2">
+              <button
+                onClick={toggleLanguage}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-white/80 hover:bg-white/10 hover:text-white text-left active:scale-95 cursor-pointer"
+              >
+                <Languages size={20} />
+                <span>{currentLang}</span>
+              </button>
               <Link
                 to="/dashboard/profile"
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
@@ -101,14 +118,14 @@ const DashboardLayout = ({ children }) => {
                 }`}
               >
                 <Settings size={20} />
-                Hồ sơ cá nhân
+                {t('sidebar.settings')}
               </Link>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-white/80 hover:bg-white/10 hover:text-white"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-white/80 hover:bg-white/10 hover:text-white cursor-pointer"
               >
                 <LogOut size={20} />
-                Đăng xuất
+                {t('sidebar.logout')}
               </button>
             </nav>
           </div>

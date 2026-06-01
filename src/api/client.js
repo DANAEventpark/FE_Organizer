@@ -10,6 +10,15 @@ client.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Get current language from localStorage
+  const lang = localStorage.getItem('i18nextLng') || 'vi';
+
+  // Set Accept-Language header
+  if (config.headers) {
+    config.headers['Accept-Language'] = lang;
+  }
+
   return config;
 });
 

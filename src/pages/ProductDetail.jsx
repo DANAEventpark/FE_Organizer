@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, FolderOpen, Clock, Send, XCircle, Edit, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { organizerApi } from '../api/organizer'; 
 import DashboardLayout from '../components/layout/DashboardLayout';
 
@@ -15,6 +16,7 @@ import CancelEventModal from '../components/modals/CancelEventModal';
 const ProductDetail = () => {
   const { id } = useParams(); 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -94,7 +96,7 @@ const ProductDetail = () => {
       <DashboardLayout>
         <div className="flex flex-col justify-center items-center h-[70vh] text-gray-500 font-medium px-4">
           <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-[#e96a52] mb-3"></div>
-          <p className="text-sm text-center">Đang tải thông tin chi tiết sự kiện...</p>
+          <p className="text-sm text-center">{t('product_detail.loading')}</p>
         </div>
       </DashboardLayout>
     );
@@ -106,15 +108,15 @@ const ProductDetail = () => {
       <DashboardLayout>
         <div className="p-6 sm:p-8 text-center max-w-md mx-auto mt-12 sm:mt-20 bg-white rounded-2xl shadow-sm border border-gray-100 mx-4 sm:mx-auto">
           <div className="text-4xl mb-3"></div>
-          <p className="text-gray-600 font-semibold mb-2 text-base">Không tìm thấy dữ liệu sự kiện!</p>
+          <p className="text-gray-600 font-semibold mb-2 text-base">{t('product_detail.not_found_title')}</p>
           <p className="text-gray-400 text-xs mb-5 leading-relaxed">
-            Vui lòng kiểm tra lại đường dẫn hoặc sự kiện này có thể đã bị xóa khỏi hệ thống.
+            {t('product_detail.not_found_desc')}
           </p>
           <button 
             onClick={() => navigate('/dashboard')}
             className="w-full sm:w-auto bg-[#e96a52] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#d75c46] transition-colors shadow-sm"
           >
-            Quay lại Dashboard
+            {t('product_detail.back_dashboard')}
           </button>
         </div>
       </DashboardLayout>
@@ -132,7 +134,7 @@ const ProductDetail = () => {
             onClick={() => navigate('/dashboard')}
             className="hover:text-gray-600 flex items-center gap-1 transition-colors"
           >
-            <ArrowLeft size={14} /> Dashboard
+            <ArrowLeft size={14} /> {t('product_detail.breadcrumb_dashboard')}
           </button>
           <span>/</span>
           <span className="text-gray-600 font-medium truncate max-w-[200px] sm:max-w-none">
@@ -154,7 +156,7 @@ const ProductDetail = () => {
                 {eventData.status || 'Draft'}
               </span>
               <span className="bg-blue-50 text-blue-700 border border-blue-100 text-[11px] px-3 py-0.5 rounded-full font-medium">
-                {eventData.category_name || 'Chưa phân loại'}
+                {eventData.category_name || t('product_detail.category_unclassified')}
               </span>
             </div>
           </div>
@@ -176,7 +178,7 @@ const ProductDetail = () => {
                 onClick={() => setIsEventModalOpen(true)}
                 className="flex-1 lg:flex-none bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-colors whitespace-nowrap"
               >
-                <Edit size={16} /> Chỉnh sửa
+                <Edit size={16} /> {t('product_detail.btn_edit')}
               </button>
             )}
 
@@ -185,7 +187,7 @@ const ProductDetail = () => {
                 onClick={() => setIsCancelModalOpen(true)}
                 className="flex-1 lg:flex-none bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 border border-red-100 transition-colors whitespace-nowrap"
               >
-                <Trash2 size={16} /> Hủy sự kiện
+                <Trash2 size={16} /> {t('product_detail.btn_delete')}
               </button>
             )}
 
@@ -218,10 +220,10 @@ const ProductDetail = () => {
             {/* Khối mô tả sự kiện */}
             <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100">
               <h3 className="font-bold text-gray-800 mb-4 text-xs sm:text-sm tracking-wide uppercase flex items-center gap-2">
-                📝 Mô tả chi tiết sự kiện
+                {t('product_detail.desc_title')}
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line break-words">
-                {eventData.description || "Chưa có mô tả chi tiết cụ thể cho sự kiện này."}
+                {eventData.description || t('product_detail.no_desc')}
               </p>
             </div>
 

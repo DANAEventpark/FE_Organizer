@@ -1,0 +1,120 @@
+{
+  "sidebar": {
+    "menu": "Menu",
+    "account": "Account",
+    "dashboard": "Dashboard",
+    "my_events": "My Events",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "login": {
+    "image_title": "Manage Da Nang events easily",
+    "image_subtitle": "Powerful tools to create, manage, and track your events effectively",
+    "badge_1": "Quick event creation",
+    "badge_2": "Detailed statistics",
+    "badge_3": "24/7 Support",
+    "title": "Welcome back",
+    "subtitle": "Log in as Organizer",
+    "email": "Email",
+    "password": "Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot password?",
+    "submit": "Log in",
+    "or": "Or",
+    "google_login": "Log in with Google",
+    "no_account": "Don't have an account?",
+    "register_now": "Register now",
+    "no_organizer_permission": "Your account does not have organizer access permissions.",
+    "failed_fallback": "An error occurred during login.",
+    "google_failed": "An error occurred during Google login."
+  },
+  "register": {
+    "title": "Create Account",
+    "subtitle_prefix": "Register as ",
+    "subtitle_role": "organizer",
+    "tagline": "Join the EventSpark community today",
+    "email_label": "Email",
+    "org_name_label": "Organization name",
+    "org_name_placeholder": "Business / Organization name",
+    "phone_label": "Phone number",
+    "password_label": "Password",
+    "submit_btn": "Register",
+    "processing": "Processing...",
+    "has_account": "Already have an account? ",
+    "login_now": "Log in now",
+    "success_msg": "Registration successful! Redirecting...",
+    "tagline_img": "Professional Event Management",
+    "desc_img": "Powerful tools to help you organize, promote, and track events in Da Nang effectively",
+    "badge_img_1": "Lean management",
+    "badge_img_2": "Reach thousands of people",
+    "badge_img_3": "Real-time statistics",
+    "error_email_required": "Please enter your email",
+    "error_email_invalid": "Invalid email address",
+    "error_name_required": "Please enter your organization name",
+    "error_name_min": "Name must be at least 2 characters",
+    "error_phone_required": "Please enter your phone number",
+    "error_phone_invalid": "Phone number must be 10 digits",
+    "error_password_required": "Please enter your password",
+    "error_password_min": "Password must be at least 8 characters",
+    "error_fallback": "Registration failed. Please try again."
+  },
+  "dashboard": {
+    "good_morning": "Good morning, {{name}} 👋",
+    "create_event": "Create event",
+    "total_events": "Total events",
+    "registrations": "Registrations",
+    "rating_points": "Rating points",
+    "my_events_title": "My Events",
+    "view_all": "View all",
+    "loading": "Loading...",
+    "table": {
+      "event_name": "Event Name",
+      "date": "Date",
+      "registration": "Registration",
+      "status": "Status",
+      "action": "Action",
+      "no_events": "No events available",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "my_events_page": {
+    "title": "All Events",
+    "no_events": "You haven't created any events yet."
+  },
+  "product_detail": {
+    "loading": "Loading event details...",
+    "not_found_title": "Event data not found!",
+    "not_found_desc": "Please check the link again or the event might have been deleted from the system.",
+    "back_dashboard": "Back to Dashboard",
+    "breadcrumb_dashboard": "Dashboard",
+    "category_unclassified": "Unclassified",
+    "btn_edit": "Edit",
+    "btn_delete": "Delete",
+    "desc_title": "📝 Detailed event description",
+    "no_desc": "No detailed description available for this event.",
+    "attendee_list": {
+      "title": "ATTENDEE LIST",
+      "registered": "Registered ({{count}})",
+      "waitlist": "Waitlist ({{count}})",
+      "name": "FULL NAME",
+      "email": "EMAIL",
+      "reg_date": "REGISTRATION DATE",
+      "empty_confirmed": "No members registered officially yet.",
+      "empty_waitlist": "The waitlist is currently empty."
+    },
+    "info": {
+      "title": "EVENT INFORMATION",
+      "category": "Category",
+      "location": "Location",
+      "date": "Date",
+      "time": "Time"
+    },
+    "overview": {
+      "title": "📊 Event Overview",
+      "registered": "Registered",
+      "waitlist": "Waitlist",
+      "created_date": "Event creation date"
+    }
+  }
+}

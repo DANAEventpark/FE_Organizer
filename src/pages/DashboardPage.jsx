@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Thêm useNavigate
 import { Plus, LayoutGrid, Users, Star, Edit, Trash2 } from 'lucide-react'; // Thêm Eye
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { organizerApi } from '../api/organizer';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -24,6 +25,7 @@ const StatCard = ({ title, value, icon: Icon, iconBg, iconColor }) => (
 const DashboardPage = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [stats, setStats] = useState({ total_events: 0, total_registrations: 0, average_rating: 0 });
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ const DashboardPage = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center items-center h-full">Loading...</div>
+        <div className="flex justify-center items-center h-full">{t('dashboard.loading')}</div>
       </DashboardLayout>
     );
   }
@@ -71,35 +73,35 @@ const DashboardPage = () => {
         <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-            <p className="text-gray-500">Chào buổi sáng, {user?.name} 👋</p>
+            <p className="text-gray-500">{t('dashboard.good_morning', { name: user?.name })}</p>
           </div>
           <Link 
             to="/events/create" 
             className="bg-[#e96a52] hover:bg-[#d75c46] text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-lg shadow-orange-500/20"
           >
             <Plus size={20} />
-            Tạo sự kiện
+            {t('dashboard.create_event')}
           </Link>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard 
-            title="Tổng sự kiện" 
+            title={t('dashboard.total_events')} 
             value={stats.total_events} 
             icon={LayoutGrid} 
             iconBg="bg-blue-50" 
             iconColor="text-blue-500" 
           />
           <StatCard 
-            title="Người đăng ký" 
+            title={t('dashboard.registrations')} 
             value={stats.total_registrations} 
             icon={Users} 
             iconBg="bg-purple-50" 
             iconColor="text-purple-500" 
           />
           <StatCard 
-            title="Điểm đánh giá" 
+            title={t('dashboard.rating_points')} 
             value={stats.average_rating} 
             icon={Star} 
             iconBg="bg-yellow-50" 
@@ -110,9 +112,9 @@ const DashboardPage = () => {
         {/* Recent Events Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-gray-900">Sự kiện của tôi</h2>
+            <h2 className="text-lg font-bold text-gray-900">{t('dashboard.my_events_title')}</h2>
             <Link to="/events" className="text-[#e96a52] hover:text-[#d75c46] text-sm font-medium flex items-center gap-1">
-              Xem tất cả <span aria-hidden="true">&rarr;</span>
+              {t('dashboard.view_all')} <span aria-hidden="true">&rarr;</span>
             </Link>
           </div>
           
@@ -120,11 +122,11 @@ const DashboardPage = () => {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50/50">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tên sự kiện</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ngày</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Đăng ký</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hành động</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.event_name')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.date')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.registration')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.status')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('dashboard.table.action')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -142,7 +144,7 @@ const DashboardPage = () => {
 
                       {/* Ngày diễn ra */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(event.start_time.replace(/-/g, '/')).toLocaleDateString('vi-VN')}
+                        {new Date(event.start_time.replace(/-/g, '/')).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}
                       </td>
 
                       {/* Tiến độ đăng ký */}
@@ -163,7 +165,7 @@ const DashboardPage = () => {
                           <button 
                             onClick={(e) => handleAction(e, event, 'chỉnh sửa')} 
                             className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-blue-500'}`}
-                            title={event.status === 'done' ? "Sự kiện đã khóa" : "Chỉnh sửa"}
+                            title={event.status === 'done' ? "Sự kiện đã khóa" : t('dashboard.table.edit')}
                           >
                             <Edit size={18} />
                           </button>
@@ -172,7 +174,7 @@ const DashboardPage = () => {
                           <button 
                             onClick={(e) => handleAction(e, event, 'xóa')} 
                             className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-red-500'}`}
-                            title={event.status === 'done' ? "Sự kiện đã khóa" : "Xóa"}
+                            title={event.status === 'done' ? "Sự kiện đã khóa" : t('dashboard.table.delete')}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -183,7 +185,7 @@ const DashboardPage = () => {
                 ) : (
                   <tr>
                     <td colSpan="5" className="px-6 py-8 text-center text-gray-500 italic">
-                      Chưa có sự kiện nào
+                      {t('dashboard.table.no_events')}
                     </td>
                   </tr>
                 )}

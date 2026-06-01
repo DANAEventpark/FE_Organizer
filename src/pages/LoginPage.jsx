@@ -1,11 +1,13 @@
 import  { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { loginApi, loginWithGoogleApi, resendVerificationEmailApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebase';
 const LoginPage = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +32,7 @@ const LoginPage = () => {
       
       const roleName = typeof user.role === 'object' ? user.role?.name : user.role;
       if (roleName !== 'organizer') {
-        setError('Tài khoản không có quyền truy cập nhà tổ chức.');
+        setError(t('login.no_organizer_permission'));
         setLoading(false);
         return;
       }
@@ -41,7 +43,7 @@ const LoginPage = () => {
       if (err.response?.data?.error_code === 'EMAIL_UNVERIFIED') {
         setIsUnverified(true);
       }
-      setError(err.response?.data?.message || 'Có lỗi xảy ra khi đăng nhập.');
+      setError(err.response?.data?.message || t('login.failed_fallback'));
     } finally {
       setLoading(false);
     }
@@ -78,7 +80,7 @@ const LoginPage = () => {
 
       const roleName = typeof dbUser.role === 'object' ? dbUser.role?.name : dbUser.role;
       if (roleName !== 'organizer') {
-        setError('Tài khoản không có quyền truy cập nhà tổ chức.');
+        setError(t('login.no_organizer_permission'));
         setLoading(false);
         return;
       }
@@ -87,7 +89,7 @@ const LoginPage = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Có lỗi xảy ra khi đăng nhập bằng Google.');
+      setError(err.response?.data?.message || t('login.google_failed'));
     } finally {
       setLoading(false);
     }
@@ -117,20 +119,20 @@ const LoginPage = () => {
           {/* Texts and Badges */}
           <div className="mt-auto pb-2 lg:pb-8">
             <h2 className="text-2xl lg:text-4xl font-bold text-white mb-3 leading-tight">
-              Quản lý sự kiện Đà Nẵng dễ dàng
+              {t('login.image_title')}
             </h2>
             <p className="text-sm lg:text-base text-gray-200 mb-6 max-w-md">
-              Công cụ mạnh mẽ để tạo, quản lý và theo dõi sự kiện của bạn hiệu quả
+              {t('login.image_subtitle')}
             </p>
             <div className="flex flex-wrap gap-2 lg:gap-3">
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Tạo sự kiện nhanh
+                {t('login.badge_1')}
               </span>
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Thống kê chi tiết
+                {t('login.badge_2')}
               </span>
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Hỗ trợ 24/7
+                {t('login.badge_3')}
               </span>
             </div>
           </div>
@@ -142,16 +144,16 @@ const LoginPage = () => {
         <div className="max-w-md w-full mx-auto">
           {/* Headings */}
           <div className="text-center mb-8">
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Chào mừng trở lại</h2>
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('login.title')}</h2>
             <p className="text-sm text-gray-500 mt-2">
-              Đăng nhập với tư cách <span className="text-green-600 font-medium">Nhà tổ chức</span>
+              {t('login.subtitle')}
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('login.email')}</label>
               <input
                 type="email"
                 required
@@ -163,7 +165,7 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('login.password')}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -186,9 +188,9 @@ const LoginPage = () => {
             <div className="flex items-center justify-between mt-2">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#E53E3E] focus:ring-[#E53E3E]" />
-                <span className="text-sm text-gray-500">Ghi nhớ đăng nhập</span>
+                <span className="text-sm text-gray-500">{t('login.remember_me')}</span>
               </label>
-              <a href="#" className="text-sm text-green-600 hover:underline">Quên mật khẩu ?</a>
+              <a href="#" className="text-sm text-green-600 hover:underline">{t('login.forgot_password')}</a>
             </div>
 
             {error && (
@@ -222,12 +224,12 @@ const LoginPage = () => {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               ) : null}
-              Đăng nhập
+              {t('login.submit')}
             </button>
             
             <div className="mt-4 flex items-center justify-center">
               <span className="h-px bg-gray-200 flex-1"></span>
-              <span className="px-4 text-sm text-gray-500">Hoặc</span>
+              <span className="px-4 text-sm text-gray-500">{t('login.or')}</span>
               <span className="h-px bg-gray-200 flex-1"></span>
             </div>
 
@@ -243,15 +245,15 @@ const LoginPage = () => {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Đăng nhập bằng Google
+              {t('login.google_login')}
             </button>
           </form>
 
           {/* Footer Link */}
           <p className="text-center text-sm text-gray-500 mt-8">
-            Chưa có tài khoản?{' '}
+            {t('login.no_account')}{' '}
             <Link to="/register" className="text-blue-500 font-medium hover:underline">
-              Đăng ký ngay
+              {t('login.register_now')}
             </Link>
 
           </p>
