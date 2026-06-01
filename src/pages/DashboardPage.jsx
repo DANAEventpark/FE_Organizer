@@ -76,7 +76,7 @@ const DashboardPage = () => {
             <p className="text-gray-500">{t('dashboard.good_morning', { name: user?.name })}</p>
           </div>
           <Link 
-            to="/events/create" 
+            to="/events?action=create" 
             className="bg-[#e96a52] hover:bg-[#d75c46] text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-lg shadow-orange-500/20"
           >
             <Plus size={20} />

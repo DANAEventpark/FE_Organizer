@@ -34,14 +34,7 @@ const MyEventsPage = () => {
     }
   };
 
-  const handleAction = (e, event, actionType) => {
-    e.stopPropagation();
-    if (event.status === 'done') {
-      alert(`Sự kiện đã hoàn thành và bị khóa, bạn không thể ${actionType}.`);
-      return;
-    }
-    console.log(`${actionType === 'chỉnh sửa' ? 'Edit' : 'Delete'} event`, event.id);
-  };
+
 
   useEffect(() => {
     fetchEvents();
