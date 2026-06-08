@@ -73,6 +73,7 @@ const LoginPage = () => {
         email: user.email,
         google_id: user.uid,
         avatar: user.photoURL,
+        role: 'organizer'
       };
 
       const response = await loginWithGoogleApi(payload);
