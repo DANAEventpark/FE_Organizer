@@ -4,8 +4,8 @@ import { createPortal } from "react-dom";
 export default function RoleSelectionModal({ isOpen, onClose, actionType }) {
   if (!isOpen) return null;
 
-  const attendeeUrl = actionType === "register" ? "http://localhost:5173/register" : "http://localhost:5173/login";
-  const organizerUrl = actionType === "register" ? "http://localhost:5174/register" : "http://localhost:5174/login";
+  const attendeeUrl = actionType === "register" ? "https://danaeventspark.vercel.app/register" : "https://danaeventspark.vercel.app/login";
+  const organizerUrl = actionType === "register" ? "https://admindanaeventspark.vercel.app/register" : "https://admindanaeventspark.vercel.app/login";
 
   const title = actionType === "register" ? "Bạn muốn đăng ký với vai trò nào?" : "Bạn muốn đăng nhập với vai trò nào?";
 
