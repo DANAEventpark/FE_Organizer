@@ -10,6 +10,13 @@ const ReviewList = ({ reviews = [], averageRating, totalReviews }) => {
     return name.substring(0, 2).toUpperCase();
   };
 
+  const getAvatarUrl = (avatarPath) => {
+    if (!avatarPath) return null;
+    if (avatarPath.startsWith('http')) return avatarPath;
+    const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:8000';
+    return `${baseUrl}/storage/${avatarPath}`;
+  };
+
   const avatarColors = ['#fca5a5', '#60a5fa', '#c084fc', '#fcd34d'];
 
   return (
@@ -33,12 +40,20 @@ const ReviewList = ({ reviews = [], averageRating, totalReviews }) => {
         {reviews.length > 0 ? (
           reviews.map((rev, idx) => (
             <div key={rev.id || idx} className="flex gap-4 p-4 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
-              <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 shrink-0" 
-                style={{ backgroundColor: avatarColors[idx % avatarColors.length] }}
-              >
-                {getInitials(rev.user?.name)}
-              </div>
+              {rev.user?.avatar ? (
+                <img 
+                  src={getAvatarUrl(rev.user.avatar)} 
+                  alt={rev.user.name} 
+                  className="w-10 h-10 rounded-full object-cover shrink-0" 
+                />
+              ) : (
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-gray-800 shrink-0" 
+                  style={{ backgroundColor: avatarColors[idx % avatarColors.length] }}
+                >
+                  {getInitials(rev.user?.name)}
+                </div>
+              )}
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-1">
                   <h4 className="font-semibold text-gray-900">{rev.user?.name || 'Người dùng'}</h4>

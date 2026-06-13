@@ -1,15 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Calendar, Settings, LogOut, Menu, X, Plus, Languages } from 'lucide-react';
 import logoImg from '../../assets/logo.jpg';
 import { useAuthStore } from '../../store/authStore';
 import { useTranslation } from 'react-i18next';
+import client from '../../api/client';
 
 const DashboardLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, logout, token } = useAuthStore();
+
+  useEffect(() => {
+    if (token) {
+      // Interceptor will handle 401 by redirecting and clearing auth
+      client.get('/auth/me').catch(() => {});
+    }
+  }, [token]);
 
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language.toUpperCase();
