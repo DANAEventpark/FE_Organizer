@@ -55,8 +55,12 @@ const MyEventsPage = () => {
     setIsEventModalOpen(true);
   };
 
-  const handleEdit = (event, e) => {
+  const handleEdit = async (event, e) => {
     e.stopPropagation();
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, bạn không thể chỉnh sửa.');
+      return;
+    }
     if (event.status === 'published') {
       alert('Không thể chỉnh sửa sự kiện đã được đăng.');
       return;
@@ -65,12 +69,21 @@ const MyEventsPage = () => {
       alert('Không thể chỉnh sửa sự kiện đã bị hủy.');
       return;
     }
-    setSelectedEvent(event);
+    try {
+      const res = await organizerApi.getEventDetail(event.id);
+      setSelectedEvent(res?.success && res.data ? res.data : event);
+    } catch {
+      setSelectedEvent(event);
+    }
     setIsEventModalOpen(true);
   };
 
   const handleDelete = (event, e) => {
     e.stopPropagation();
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, bạn không thể xóa.');
+      return;
+    }
     if (event.status === 'cancelled') {
       alert('Sự kiện đã bị hủy.');
       return;

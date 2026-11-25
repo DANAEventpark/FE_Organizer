@@ -25,7 +25,18 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const requestUrl = error.config?.url || '';
+    const isAuthEndpoint =
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/google') ||
+      requestUrl.includes('/auth/register');
+
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !isAuthEndpoint &&
+      window.location.pathname !== '/login'
+    ) {
       useAuthStore.getState().logout();
       window.location.href = '/login';
     }

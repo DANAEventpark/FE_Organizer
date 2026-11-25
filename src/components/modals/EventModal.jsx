@@ -1,16 +1,26 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { organizerApi } from '../../api/organizer';
-import client from '../../api/client'; // Dùng để fetch categories
+import client from '../../api/client';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { format, subHours } from 'date-fns';
+import { format, subHours, isSameDay, setHours, setMinutes } from 'date-fns';
+
+const MAX_CAPACITY = 100000;
+
+const parseDate = (dateString) => {
+  if (!dateString) return null;
+  const safeStr = typeof dateString === 'string' ? dateString.replace(/-/g, '/') : dateString;
+  const d = new Date(safeStr);
+  return isNaN(d.getTime()) ? null : d;
+};
 
 const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   const isUpdate = !!initialData;
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  
+  const [formError, setFormError] = useState('');
+
   const [formData, setFormData] = useState({
     title: '',
     category_id: '',
@@ -25,7 +35,6 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   });
 
   useEffect(() => {
-    // Fetch categories
     const fetchCategories = async () => {
       try {
         const response = await client.get('/categories');
@@ -33,7 +42,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
           setCategories(response.data.data);
         }
       } catch (error) {
-        console.error("Lỗi tải danh mục", error);
+        console.error('Lỗi tải danh mục', error);
       }
     };
     if (isOpen) {
@@ -42,54 +51,105 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        const parseDate = (dateString) => {
-          if (!dateString) return null;
-          const safeStr = typeof dateString === 'string' ? dateString.replace(/-/g, '/') : dateString;
-          const d = new Date(safeStr);
-          return isNaN(d.getTime()) ? null : d;
-        };
+    if (!isOpen) return;
+    setFormError('');
 
-        setFormData({
-          title: initialData.title || '',
-          category_id: initialData.category_id || '',
-          capacity: initialData.capacity || '',
-          start_time: parseDate(initialData.start_time),
-          end_time: parseDate(initialData.end_time),
-          registration_deadline: parseDate(initialData.registration_deadline),
-          location: initialData.location || '',
-          description: initialData.description || '',
-          image: initialData.image || '',
-          status: initialData.status || 'draft'
-        });
-      } else {
-        setFormData({
-          title: '',
-          category_id: '',
-          capacity: '',
-          start_time: null,
-          end_time: null,
-          registration_deadline: null,
-          location: '',
-          description: '',
-          image: '',
-          status: 'draft'
-        });
+    const applyData = (data) => {
+      setFormData({
+        title: data.title || '',
+        category_id: data.category_id ? String(data.category_id) : '',
+        capacity: data.capacity ?? '',
+        start_time: parseDate(data.start_time),
+        end_time: parseDate(data.end_time),
+        registration_deadline: parseDate(data.registration_deadline),
+        location: data.location || '',
+        description: data.description || '',
+        image: data.image || '',
+        status: data.status || 'draft'
+      });
+    };
+
+    if (initialData) {
+      applyData(initialData);
+      // Fallback: if list payload missed detail fields, fetch full detail
+      if (initialData.id && (initialData.description === undefined || initialData.end_time === undefined || initialData.location === undefined)) {
+        organizerApi.getEventDetail(initialData.id)
+          .then((res) => {
+            if (res?.success && res.data) {
+              applyData(res.data);
+            }
+          })
+          .catch((err) => console.error('Lỗi tải chi tiết sự kiện:', err));
       }
+    } else {
+      setFormData({
+        title: '',
+        category_id: '',
+        capacity: '',
+        start_time: null,
+        end_time: null,
+        registration_deadline: null,
+        location: '',
+        description: '',
+        image: '',
+        status: 'draft'
+      });
     }
   }, [isOpen, initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormError('');
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    const now = new Date();
+
+    if (!formData.title.trim()) {
+      return 'Vui lòng nhập tên sự kiện.';
+    }
+
+    const parsedCapacity = Number(formData.capacity);
+    if (!Number.isInteger(parsedCapacity) || parsedCapacity < 1 || parsedCapacity > MAX_CAPACITY) {
+      return `Sức chứa phải là số nguyên từ 1 đến ${MAX_CAPACITY.toLocaleString('vi-VN')} người.`;
+    }
+
+    if (!formData.start_time || isNaN(formData.start_time.getTime())) {
+      return 'Vui lòng chọn ngày và giờ bắt đầu.';
+    }
+
+    if (formData.start_time <= now) {
+      return 'Thời gian bắt đầu không được ở trong quá khứ. Vui lòng chọn thời gian trong tương lai.';
+    }
+
+    if (!formData.end_time || isNaN(formData.end_time.getTime())) {
+      return 'Vui lòng chọn ngày và giờ kết thúc.';
+    }
+
+    if (formData.end_time <= formData.start_time) {
+      return 'Thời gian kết thúc phải sau thời gian bắt đầu.';
+    }
+
+    if (!formData.location.trim()) {
+      return 'Vui lòng nhập địa điểm diễn ra sự kiện.';
+    }
+
+    return '';
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
+
+    const validationErr = validateForm();
+    if (validationErr) {
+      setFormError(validationErr);
+      return;
+    }
+
     setLoading(true);
     try {
-      // Format data for API
       const formatDateForApi = (dateObj) => {
         if (!dateObj) return null;
         return format(dateObj, 'yyyy-MM-dd HH:mm:ss');
@@ -97,6 +157,10 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
 
       const dataToSubmit = {
         ...formData,
+        title: formData.title.trim(),
+        location: formData.location.trim(),
+        capacity: Number(formData.capacity),
+        category_id: formData.category_id ? Number(formData.category_id) : null,
         start_time: formatDateForApi(formData.start_time),
         end_time: formatDateForApi(formData.end_time),
         registration_deadline: formatDateForApi(formData.registration_deadline),
@@ -109,14 +173,22 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
       }
       onSuccess();
     } catch (error) {
-      console.error("Lỗi khi lưu sự kiện:", error);
-      alert(error.response?.data?.message || "Có lỗi xảy ra khi lưu sự kiện");
+      console.error('Lỗi khi lưu sự kiện:', error);
+      const apiErrors = error.response?.data?.errors;
+      const firstFieldError = apiErrors ? Object.values(apiErrors).flat()[0] : null;
+      const message = firstFieldError || error.response?.data?.message || 'Có lỗi xảy ra khi lưu sự kiện';
+      setFormError(message);
     } finally {
       setLoading(false);
     }
   };
 
   if (!isOpen) return null;
+
+  const now = new Date();
+  const isStartToday = formData.start_time ? isSameDay(formData.start_time, now) : true;
+  const minStartTime = isStartToday ? now : setHours(setMinutes(new Date(), 0), 0);
+  const maxStartTime = setHours(setMinutes(new Date(), 59), 23);
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center p-4">
@@ -137,143 +209,159 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="p-6 overflow-y-auto">
+            {formError && (
+              <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+                {formError}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tên sự kiện</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Nhập tên sự kiện"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
-                required
-              />
-            </div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tên sự kiện</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="Nhập tên sự kiện"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Danh mục</label>
-              <select
-                name="category_id"
-                value={formData.category_id}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm bg-white"
-                required
-              >
-                <option value="">Danh mục</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Danh mục</label>
+                <select
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm bg-white"
+                  required
+                >
+                  <option value="">Danh mục</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lượt đăng ký (Sức chứa)</label>
-              <input
-                type="number"
-                name="capacity"
-                value={formData.capacity}
-                onChange={handleChange}
-                placeholder="0"
-                min="1"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
-                required
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lượt đăng ký (Sức chứa)</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  value={formData.capacity}
+                  onChange={handleChange}
+                  placeholder="1 - 100000"
+                  min="1"
+                  max={MAX_CAPACITY}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                  required
+                />
+              </div>
 
-            <div className="flex flex-col">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Ngày bắt đầu</label>
-              <DatePicker
-                selected={formData.start_time}
-                onChange={(date) => setFormData(prev => ({
-                  ...prev,
-                  start_time: date,
-                  registration_deadline: date ? subHours(date, 24) : null
-                }))}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                dateFormat="dd/MM/yyyy HH:mm"
-                placeholderText="dd/mm/yyyy hh:mm"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
-                wrapperClassName="w-full"
-                required
-                isClearable
-              />
-            </div>
+              <div className="flex flex-col">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Ngày bắt đầu</label>
+                <DatePicker
+                  selected={formData.start_time}
+                  onChange={(date) => {
+                    setFormError('');
+                    setFormData((prev) => ({
+                      ...prev,
+                      start_time: date,
+                      registration_deadline: date ? subHours(date, 24) : null
+                    }));
+                  }}
+                  showTimeSelect
+                  minDate={now}
+                  minTime={minStartTime}
+                  maxTime={maxStartTime}
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="dd/MM/yyyy HH:mm"
+                  placeholderText="dd/mm/yyyy hh:mm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                  wrapperClassName="w-full"
+                  required
+                  isClearable
+                />
+              </div>
 
-            <div className="flex flex-col">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Ngày kết thúc</label>
-              <DatePicker
-                selected={formData.end_time}
-                onChange={(date) => setFormData(prev => ({ ...prev, end_time: date }))}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                dateFormat="dd/MM/yyyy HH:mm"
-                placeholderText="dd/mm/yyyy hh:mm"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
-                wrapperClassName="w-full"
-                required
-                isClearable
-              />
-            </div>
+              <div className="flex flex-col">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Ngày kết thúc</label>
+                <DatePicker
+                  selected={formData.end_time}
+                  onChange={(date) => {
+                    setFormError('');
+                    setFormData((prev) => ({ ...prev, end_time: date }));
+                  }}
+                  showTimeSelect
+                  minDate={formData.start_time || now}
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="dd/MM/yyyy HH:mm"
+                  placeholderText="dd/mm/yyyy hh:mm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                  wrapperClassName="w-full"
+                  required
+                  isClearable
+                />
+              </div>
 
-            <div className="flex flex-col">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Hạn đăng ký</label>
-              <DatePicker
-                selected={formData.registration_deadline}
-                onChange={(date) => setFormData(prev => ({ ...prev, registration_deadline: date }))}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                dateFormat="dd/MM/yyyy HH:mm"
-                placeholderText="Tự động điền (trước 24h)"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none transition-colors text-sm bg-gray-100 cursor-not-allowed text-gray-500"
-                wrapperClassName="w-full"
-                disabled
-              />
-            </div>
+              <div className="flex flex-col">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Hạn đăng ký</label>
+                <DatePicker
+                  selected={formData.registration_deadline}
+                  onChange={(date) => setFormData((prev) => ({ ...prev, registration_deadline: date }))}
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="dd/MM/yyyy HH:mm"
+                  placeholderText="Tự động điền (trước 24h)"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none transition-colors text-sm bg-gray-100 cursor-not-allowed text-gray-500"
+                  wrapperClassName="w-full"
+                  disabled
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Trạng thái</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                disabled={isUpdate && initialData?.status === 'published'}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm bg-white disabled:bg-gray-100"
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
-            </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Trạng thái</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  disabled={isUpdate && initialData?.status === 'published'}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm bg-white disabled:bg-gray-100"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Địa điểm</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Nhập địa điểm diễn ra sự kiện"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
-                required
-              />
-            </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Địa điểm</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="Nhập địa điểm diễn ra sự kiện"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm"
+                  required
+                />
+              </div>
 
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mô tả</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Viết mô tả"
-                rows="4"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm resize-none"
-              ></textarea>
-            </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mô tả</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Viết mô tả"
+                  rows="4"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#e96a52]/20 focus:border-[#e96a52] transition-colors text-sm resize-none"
+                ></textarea>
+              </div>
             </div>
           </div>
 

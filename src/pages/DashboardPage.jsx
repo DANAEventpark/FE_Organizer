@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Thêm useNavigate
-import { Plus, LayoutGrid, Users, Star, Edit, Trash2 } from 'lucide-react'; // Thêm Eye
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Plus, LayoutGrid, Users, Star, Edit, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { organizerApi } from '../api/organizer';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import StatusBadge from '../components/common/StatusBadge';
 import ProgressBar from '../components/common/ProgressBar';
+import EventModal from '../components/modals/EventModal';
+import CancelEventModal from '../components/modals/CancelEventModal';
 
 const StatCard = ({ title, value, icon: Icon, iconBg, iconColor }) => (
   <div className="bg-white rounded-xl p-6 shadow-sm flex items-center justify-between">
@@ -20,8 +22,6 @@ const StatCard = ({ title, value, icon: Icon, iconBg, iconColor }) => (
   </div>
 );
 
-
-
 const DashboardPage = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -29,34 +29,72 @@ const DashboardPage = () => {
   const [stats, setStats] = useState({ total_events: 0, total_registrations: 0, average_rating: 0 });
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const handleAction = (e, event, actionType) => {
-    e.stopPropagation();
-    if (event.status === 'done') {
-      alert(`Sự kiện đã hoàn thành và bị khóa, bạn không thể ${actionType}.`);
-      return;
+  const fetchData = useCallback(async () => {
+    try {
+      const [statsRes, eventsRes] = await Promise.all([
+        organizerApi.getDashboardStats(),
+        organizerApi.getRecentEvents()
+      ]);
+      if (statsRes.success) setStats(statsRes.data);
+      if (eventsRes.success) setEvents(eventsRes.data);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
-    console.log(`${actionType === 'chỉnh sửa' ? 'Edit' : 'Delete'} event`, event.id);
-  };
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsRes, eventsRes] = await Promise.all([
-          organizerApi.getDashboardStats(),
-          organizerApi.getRecentEvents()
-        ]);
-        if (statsRes.success) setStats(statsRes.data);
-        if (eventsRes.success) setEvents(eventsRes.data);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchData();
-  }, []);
+  }, [fetchData]);
+
+  const handleEdit = async (e, event) => {
+    e.stopPropagation();
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, bạn không thể chỉnh sửa.');
+      return;
+    }
+    if (event.status === 'published') {
+      alert('Không thể chỉnh sửa sự kiện đã được đăng.');
+      return;
+    }
+    if (event.status === 'cancelled') {
+      alert('Không thể chỉnh sửa sự kiện đã bị hủy.');
+      return;
+    }
+    try {
+      const res = await organizerApi.getEventDetail(event.id);
+      setSelectedEvent(res?.success && res.data ? res.data : event);
+    } catch {
+      setSelectedEvent(event);
+    }
+    setIsEventModalOpen(true);
+  };
+
+  const handleDelete = (e, event) => {
+    e.stopPropagation();
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, bạn không thể xóa.');
+      return;
+    }
+    if (event.status === 'cancelled') {
+      alert('Sự kiện đã bị hủy.');
+      return;
+    }
+    setSelectedEvent(event);
+    setIsCancelModalOpen(true);
+  };
+
+  const handleModalSuccess = () => {
+    setIsEventModalOpen(false);
+    setIsCancelModalOpen(false);
+    setSelectedEvent(null);
+    fetchData();
+  };
 
   if (loading) {
     return (
@@ -75,8 +113,8 @@ const DashboardPage = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
             <p className="text-gray-500">{t('dashboard.good_morning', { name: user?.name })}</p>
           </div>
-          <Link 
-            to="/events?action=create" 
+          <Link
+            to="/events?action=create"
             className="bg-[#e96a52] hover:bg-[#d75c46] text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-lg shadow-orange-500/20"
           >
             <Plus size={20} />
@@ -86,26 +124,26 @@ const DashboardPage = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard 
-            title={t('dashboard.total_events')} 
-            value={stats.total_events} 
-            icon={LayoutGrid} 
-            iconBg="bg-blue-50" 
-            iconColor="text-blue-500" 
+          <StatCard
+            title={t('dashboard.total_events')}
+            value={stats.total_events}
+            icon={LayoutGrid}
+            iconBg="bg-blue-50"
+            iconColor="text-blue-500"
           />
-          <StatCard 
-            title={t('dashboard.registrations')} 
-            value={stats.total_registrations} 
-            icon={Users} 
-            iconBg="bg-purple-50" 
-            iconColor="text-purple-500" 
+          <StatCard
+            title={t('dashboard.registrations')}
+            value={stats.total_registrations}
+            icon={Users}
+            iconBg="bg-purple-50"
+            iconColor="text-purple-500"
           />
-          <StatCard 
-            title={t('dashboard.rating_points')} 
-            value={stats.average_rating} 
-            icon={Star} 
-            iconBg="bg-yellow-50" 
-            iconColor="text-yellow-500" 
+          <StatCard
+            title={t('dashboard.rating_points')}
+            value={stats.average_rating}
+            icon={Star}
+            iconBg="bg-yellow-50"
+            iconColor="text-yellow-500"
           />
         </div>
 
@@ -117,7 +155,7 @@ const DashboardPage = () => {
               {t('dashboard.view_all')} <span aria-hidden="true">&rarr;</span>
             </Link>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -131,57 +169,72 @@ const DashboardPage = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {events.length > 0 ? (
-                  events.map((event) => (
-                    <tr 
-                      key={event.id} 
-                      onClick={() => navigate(`/events/${event.id}`)} 
-                      className="hover:bg-gray-50/80 transition-colors cursor-pointer" 
-                    >
-                      {/* Tên sự kiện */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 hover:text-[#e96a52] transition-colors">
-                        {event.title}
-                      </td>
+                  events.map((event) => {
+                    const isEditDisabled = event.status === 'published' || event.status === 'cancelled' || event.status === 'done';
+                    const isDeleteDisabled = event.status === 'cancelled' || event.status === 'done';
 
-                      {/* Ngày diễn ra */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(event.start_time.replace(/-/g, '/')).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}
-                      </td>
+                    return (
+                      <tr
+                        key={event.id}
+                        onClick={() => navigate(`/events/${event.id}`)}
+                        className="hover:bg-gray-50/80 transition-colors cursor-pointer"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 hover:text-[#e96a52] transition-colors">
+                          {event.title}
+                        </td>
 
-                      {/* Tiến độ đăng ký */}
-                      <td className="px-6 py-4 whitespace-nowrap w-64" onClick={(e) => e.stopPropagation()}>
-                        {/* Bọc hoặc thêm e.stopPropagation() nếu thanh progress bar có tương tác, tránh nhảy trang ngoài ý muốn */}
-                        <ProgressBar current={event.registrations_count || 0} max={event.capacity || 0} />
-                      </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {event.start_time
+                            ? new Date(event.start_time.replace(/-/g, '/')).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'vi-VN')
+                            : 'N/A'}
+                        </td>
 
-                      {/* Trạng thái */}
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge status={event.status} />
-                      </td>
+                        <td className="px-6 py-4 whitespace-nowrap w-64" onClick={(e) => e.stopPropagation()}>
+                          <ProgressBar current={event.registrations_count || 0} max={event.capacity || 0} />
+                        </td>
 
-                      {/* Hành động (Sửa/Xóa) */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                        <div className="flex gap-3">
-                          {/* Nút chỉnh sửa */}
-                          <button 
-                            onClick={(e) => handleAction(e, event, 'chỉnh sửa')} 
-                            className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-blue-500'}`}
-                            title={event.status === 'done' ? "Sự kiện đã khóa" : t('dashboard.table.edit')}
-                          >
-                            <Edit size={18} />
-                          </button>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <StatusBadge status={event.status} />
+                        </td>
 
-                          {/* Nút xóa */}
-                          <button 
-                            onClick={(e) => handleAction(e, event, 'xóa')} 
-                            className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-red-500'}`}
-                            title={event.status === 'done' ? "Sự kiện đã khóa" : t('dashboard.table.delete')}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={(e) => handleEdit(e, event)}
+                              className={`transition-all ${isEditDisabled ? 'text-gray-300 opacity-40 cursor-not-allowed' : 'hover:text-blue-500'}`}
+                              title={
+                                event.status === 'done'
+                                  ? 'Sự kiện đã khóa'
+                                  : event.status === 'published'
+                                    ? 'Không thể chỉnh sửa sự kiện đã đăng'
+                                    : event.status === 'cancelled'
+                                      ? 'Không thể chỉnh sửa sự kiện đã hủy'
+                                      : t('dashboard.table.edit')
+                              }
+                            >
+                              <Edit size={18} />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) => handleDelete(e, event)}
+                              className={`transition-all ${isDeleteDisabled ? 'text-gray-300 opacity-40 cursor-not-allowed' : 'hover:text-red-500'}`}
+                              title={
+                                event.status === 'done'
+                                  ? 'Sự kiện đã khóa'
+                                  : event.status === 'cancelled'
+                                    ? 'Sự kiện đã hủy'
+                                    : t('dashboard.table.delete')
+                              }
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan="5" className="px-6 py-8 text-center text-gray-500 italic">
@@ -194,9 +247,22 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+      <EventModal
+        isOpen={isEventModalOpen}
+        onClose={() => setIsEventModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        initialData={selectedEvent}
+      />
+
+      <CancelEventModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onSuccess={handleModalSuccess}
+        eventData={selectedEvent}
+      />
     </DashboardLayout>
   );
 };
-
 
 export default DashboardPage;

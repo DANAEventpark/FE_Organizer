@@ -33,9 +33,15 @@ const ProfilePage = () => {
 
   const handleUpdateInfo = async (e) => {
     e.preventDefault();
-    setInfoLoading(true);
     setInfoMessage({ type: '', text: '' });
-    
+
+    const trimmedPhone = (infoForm.phone || '').trim();
+    if (trimmedPhone && !/^[0-9]{10,11}$/.test(trimmedPhone)) {
+      setInfoMessage({ type: 'error', text: 'SĐT không hợp lệ. Vui lòng nhập số (10-11 chữ số).' });
+      return;
+    }
+
+    setInfoLoading(true);
     try {
       let avatarUrl = infoForm.avatar;
       
@@ -49,7 +55,7 @@ const ProfilePage = () => {
       
       const payload = {
         name: infoForm.name,
-        phone: infoForm.phone,
+        phone: trimmedPhone,
         avatar: avatarUrl
       };
       
@@ -61,7 +67,9 @@ const ProfilePage = () => {
       setInfoForm({ name: updatedUser.name, phone: updatedUser.phone, avatar: updatedUser.avatar });
       setImageFile(null);
     } catch (error) {
-      setInfoMessage({ type: 'error', text: error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật.' });
+      const apiErrors = error.response?.data?.errors;
+      const firstFieldError = apiErrors ? Object.values(apiErrors).flat()[0] : null;
+      setInfoMessage({ type: 'error', text: firstFieldError || error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật.' });
     } finally {
       setInfoLoading(false);
     }
