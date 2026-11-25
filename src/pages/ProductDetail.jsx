@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, MapPin, FolderOpen, Clock, Send, XCircle, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Send, Edit, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { organizerApi } from '../api/organizer'; 
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -23,7 +23,6 @@ const ProductDetail = () => {
   const [updating, setUpdating] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
 
   const handleUpdateStatus = async (newStatus) => {
     if (window.confirm(`Bạn có chắc muốn chuyển trạng thái sự kiện sang ${newStatus === 'published' ? 'xuất bản' : 'hủy'}?`)) {
@@ -68,21 +67,6 @@ const ProductDetail = () => {
       fetchEventDetail();
     }
   }, [id, fetchEventDetail]);
-
-  const handlePublish = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn đăng (publish) sự kiện này?")) {
-      setActionLoading(true);
-      try {
-        await organizerApi.updateEvent(eventData.id, { status: 'published' });
-        fetchEventDetail();
-      } catch (error) {
-        console.error("Lỗi khi publish:", error);
-        alert("Lỗi khi đăng sự kiện");
-      } finally {
-        setActionLoading(false);
-      }
-    }
-  };
 
   const handleModalSuccess = () => {
     setIsEventModalOpen(false);

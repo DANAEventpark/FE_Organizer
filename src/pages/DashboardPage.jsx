@@ -30,13 +30,34 @@ const DashboardPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handleAction = (e, event, actionType) => {
+  const handleEdit = (e, event) => {
     e.stopPropagation();
-    if (event.status === 'done') {
-      alert(`Sự kiện đã hoàn thành và bị khóa, bạn không thể ${actionType}.`);
+    if (event.status === 'published') {
+      alert('Không thể chỉnh sửa vì sự kiện đã được xuất bản (Published).');
       return;
     }
-    console.log(`${actionType === 'chỉnh sửa' ? 'Edit' : 'Delete'} event`, event.id);
+    if (event.status === 'cancelled') {
+      alert('Không thể chỉnh sửa vì sự kiện đã bị hủy.');
+      return;
+    }
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, không thể chỉnh sửa.');
+      return;
+    }
+    navigate(`/events?edit=${event.id}`);
+  };
+
+  const handleDelete = (e, event) => {
+    e.stopPropagation();
+    if (event.status === 'cancelled') {
+      alert('Sự kiện đã bị hủy.');
+      return;
+    }
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, không thể xóa.');
+      return;
+    }
+    navigate(`/events?cancel=${event.id}`);
   };
 
   useEffect(() => {
@@ -163,18 +184,32 @@ const DashboardPage = () => {
                         <div className="flex gap-3">
                           {/* Nút chỉnh sửa */}
                           <button 
-                            onClick={(e) => handleAction(e, event, 'chỉnh sửa')} 
-                            className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-blue-500'}`}
-                            title={event.status === 'done' ? "Sự kiện đã khóa" : t('dashboard.table.edit')}
+                            onClick={(e) => handleEdit(e, event)} 
+                            className={`transition-all ${(event.status === 'published' || event.status === 'cancelled' || event.status === 'done') ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-blue-500'}`}
+                            title={
+                              event.status === 'done'
+                                ? 'Sự kiện đã khóa'
+                                : event.status === 'published'
+                                  ? 'Không thể chỉnh sửa sự kiện đã xuất bản'
+                                  : event.status === 'cancelled'
+                                    ? 'Không thể chỉnh sửa sự kiện đã hủy'
+                                    : t('dashboard.table.edit')
+                            }
                           >
                             <Edit size={18} />
                           </button>
 
                           {/* Nút xóa */}
                           <button 
-                            onClick={(e) => handleAction(e, event, 'xóa')} 
-                            className={`transition-all ${event.status === 'done' ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-red-500'}`}
-                            title={event.status === 'done' ? "Sự kiện đã khóa" : t('dashboard.table.delete')}
+                            onClick={(e) => handleDelete(e, event)} 
+                            className={`transition-all ${(event.status === 'cancelled' || event.status === 'done') ? 'opacity-30 cursor-not-allowed grayscale' : 'hover:text-red-500'}`}
+                            title={
+                              event.status === 'done'
+                                ? 'Sự kiện đã khóa'
+                                : event.status === 'cancelled'
+                                  ? 'Sự kiện đã hủy'
+                                  : t('dashboard.table.delete')
+                            }
                           >
                             <Trash2 size={18} />
                           </button>

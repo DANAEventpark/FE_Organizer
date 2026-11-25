@@ -45,10 +45,45 @@ const MyEventsPage = () => {
     if (params.get('action') === 'create') {
       setSelectedEvent(null);
       setIsEventModalOpen(true);
-      // Xóa query param để không tự mở lại khi refresh
+      navigate('/events', { replace: true });
+      return;
+    }
+
+    const editId = params.get('edit');
+    if (editId && !loading) {
+      const targetEvent = events.find((ev) => String(ev.id) === String(editId));
+      if (targetEvent) {
+        if (targetEvent.status === 'published') {
+          alert('Không thể chỉnh sửa vì sự kiện đã được xuất bản (Published).');
+        } else if (targetEvent.status === 'cancelled') {
+          alert('Không thể chỉnh sửa vì sự kiện đã bị hủy.');
+        } else if (targetEvent.status === 'done') {
+          alert('Sự kiện đã hoàn thành và bị khóa, không thể chỉnh sửa.');
+        } else {
+          setSelectedEvent(targetEvent);
+          setIsEventModalOpen(true);
+        }
+      }
+      navigate('/events', { replace: true });
+      return;
+    }
+
+    const cancelId = params.get('cancel');
+    if (cancelId && !loading) {
+      const targetEvent = events.find((ev) => String(ev.id) === String(cancelId));
+      if (targetEvent) {
+        if (targetEvent.status === 'cancelled') {
+          alert('Sự kiện đã bị hủy.');
+        } else if (targetEvent.status === 'done') {
+          alert('Sự kiện đã hoàn thành và bị khóa, không thể xóa.');
+        } else {
+          setSelectedEvent(targetEvent);
+          setIsCancelModalOpen(true);
+        }
+      }
       navigate('/events', { replace: true });
     }
-  }, [location.search, navigate]);
+  }, [location.search, loading, events, navigate]);
 
   const handleCreateNew = () => {
     setSelectedEvent(null);
@@ -58,11 +93,15 @@ const MyEventsPage = () => {
   const handleEdit = (event, e) => {
     e.stopPropagation();
     if (event.status === 'published') {
-      alert('Không thể chỉnh sửa sự kiện đã được đăng.');
+      alert('Không thể chỉnh sửa vì sự kiện đã được xuất bản (Published).');
       return;
     }
     if (event.status === 'cancelled') {
-      alert('Không thể chỉnh sửa sự kiện đã bị hủy.');
+      alert('Không thể chỉnh sửa vì sự kiện đã bị hủy.');
+      return;
+    }
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, không thể chỉnh sửa.');
       return;
     }
     setSelectedEvent(event);
@@ -73,6 +112,10 @@ const MyEventsPage = () => {
     e.stopPropagation();
     if (event.status === 'cancelled') {
       alert('Sự kiện đã bị hủy.');
+      return;
+    }
+    if (event.status === 'done') {
+      alert('Sự kiện đã hoàn thành và bị khóa, không thể xóa.');
       return;
     }
     setSelectedEvent(event);

@@ -190,6 +190,7 @@ const EventModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
                   start_time: date,
                   registration_deadline: date ? subHours(date, 24) : null
                 }))}
+                minDate={new Date()}
                 showTimeSelect
                 timeFormat="HH:mm"
                 timeIntervals={15}

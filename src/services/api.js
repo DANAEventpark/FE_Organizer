@@ -45,9 +45,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token hết hạn hoặc không hợp lệ → xoá auth và redirect login
-      useAuthStore.getState().clearAuth()
-      window.location.href = '/login'
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      const isLoginPage = window.location.pathname.includes('/login');
+      if (!isLoginRequest && !isLoginPage) {
+        // Token hết hạn hoặc không hợp lệ → xoá auth và redirect login
+        useAuthStore.getState().clearAuth()
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
